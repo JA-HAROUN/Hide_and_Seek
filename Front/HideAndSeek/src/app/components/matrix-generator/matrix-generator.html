@@ -4,8 +4,8 @@
         @for (row of matrix; track $index) {
             <div class="row">
                 @for (box of row; track $index) {
-                    <div class="cell" [class.revealed]="box.revealed" [class.hider]="box.hider">
-                        {{ box.revealed ? (box.hider ? 'Person' : 'Bomb') : '?' }}
+                    <div class="cell">
+                        <app-box [box]="box"></app-box>
                     </div>
                 }
             </div>

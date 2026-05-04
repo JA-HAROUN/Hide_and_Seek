@@ -30,12 +30,27 @@
     transform: scale(0.97);
 }
 
-#value {
-    text-align: center;
-    pointer-events: none;
+/* Unrevealed — tan background, navy text */
+.reveal-btn {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        z-index: 10;
 }
 
-/* Unrevealed — tan background, navy text */
+#value {
+        text-align: center;
+        pointer-events: none;
+        z-index: 2;
+        position: relative;
+}
+
 .uncovered {
     background-color: var(--tan);
     color: var(--navy);
@@ -51,4 +66,216 @@
 .covered:hover {
     background-color: var(--navy-dim, #001833) !important;
     transform: none !important;
+}
+
+#box-container {
+    position: relative;
+    width: 3.75em;
+    height: 3.75em;
+    display: inline-block;
+}
+
+/* Wooden Box Style */
+.wooden-box {
+        background: linear-gradient(
+            135deg,
+            #8B4513 0%,
+            #A0522D 25%,
+            #8B4513 50%,
+            #654321 75%,
+            #7D3C1D 100%
+        );
+        background-size: 100% 100%;
+        border: 2px solid #3d2817;
+        box-shadow: 
+            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+            inset 0 -2px 0 rgba(0, 0, 0, 0.4),
+            0 4px 6px rgba(0, 0, 0, 0.3);
+        color: #f4e4d7;
+        font-weight: 700;
+}
+
+.wooden-box:hover {
+        background: linear-gradient(
+            135deg,
+            #9c5a21 0%,
+            #b5633d 25%,
+            #9c5a21 50%,
+            #745d2f 75%,
+            #8b4523 100%
+        );
+        transform: scale(1.06);
+        z-index: 1;
+        position: relative;
+}
+
+.wooden-box:active {
+        transform: scale(0.97);
+}
+
+/* Smashing Animation */
+@keyframes smash {
+        0% {
+            transform: scale(1) scaleY(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1) scaleY(0.8);
+        }
+        100% {
+            transform: scale(0.3) scaleY(0.5);
+            opacity: 0;
+        }
+}
+
+.wooden-box.smashing {
+        animation: smash 0.6s ease-in forwards;
+}
+
+.box-number {
+        color: inherit;
+        font-weight: 600;
+        font-size: 1.5em;
+}
+
+/* Treasure Container */
+#treasure-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.5em;
+}
+
+#treasure-gif {
+        width: 3em;
+        height: 3em;
+        object-fit: contain;
+}
+
+.treasure-number {
+        font-size: 1.2em;
+        font-weight: 700;
+        color: #DAA520;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Bomb Container */
+#bomb-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+}
+
+.bomb-sprite {
+        width: 2.5em;
+        height: 2.5em;
+        background: radial-gradient(circle at 30% 30%, #4a4a4a, #1a1a1a);
+        border-radius: 50%;
+        border: 2px solid #0a0a0a;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+        position: relative;
+}
+
+.bomb-sprite::before {
+        content: '';
+        position: absolute;
+        top: -0.4em;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0.3em;
+        height: 0.6em;
+        background: #8B4513;
+        border-radius: 2px;
+}
+
+.bomb-sprite::after {
+        content: '';
+        position: absolute;
+        top: -0.6em;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0.15em;
+        height: 0.15em;
+        background: #FFD700;
+        border-radius: 50%;
+        box-shadow: 0 0 4px #FFD700;
+        animation: spark 0.8s infinite;
+}
+
+@keyframes spark {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+}
+
+#bomb-gif {
+        width: 4em;
+        height: 4em;
+        object-fit: contain;
+        animation: explosion-scale 1s ease-out forwards;
+}
+
+@keyframes explosion-scale {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+        50% {
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+}
+
+.explosion-animation {
+        animation: explosion-scale 1s ease-out forwards;
+}
+
+/* Number Only (after explosion) */
+#number-only {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5em;
+        font-weight: 700;
+        color: var(--navy);
+        animation: fade-in 0.4s ease-out;
+}
+
+@keyframes fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+}
+
+/* Reveal Animation */
+.reveal-animation {
+        animation: reveal 0.5s ease-out;
+}
+
+@keyframes reveal {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
 }
