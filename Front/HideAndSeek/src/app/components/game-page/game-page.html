@@ -1,0 +1,21 @@
+<div class="page-container">
+    <header class="page-header">
+        <div class="score-panel">
+            <div class="score-label"><h2>Hider Score</h2></div>
+            <div class="score-value"><p>{{ hiderScore }}</p></div>
+        </div>
+        <div class="score-panel">
+            <div class="score-label"><h2>Seeker Score</h2></div>
+            <div class="score-value"><p>{{ seekerScore }}</p></div>
+        </div>
+    </header>
+
+    <main class="board-area">
+        <app-matrix-generator></app-matrix-generator>
+    </main>
+
+    <footer class="page-footer">
+        <button class="btn-secondary btn-small" (click)="showSimplexTableau()">Simplex Tableau</button>
+        <button class="btn-accent btn-small" (click)="resetGame()">Reset</button>
+    </footer>
+</div>

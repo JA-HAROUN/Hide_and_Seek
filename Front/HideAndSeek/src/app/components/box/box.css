@@ -1,0 +1,54 @@
+/* ── Box Component ──────────────────────────────── */
+
+#box {
+    width: 3.75em;
+    height: 3.75em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9em;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    border: 1px solid var(--brown);
+    border-radius: 0;          /* flush grid look */
+    transition:
+        background-color 0.15s ease,
+        color            0.15s ease,
+        transform        0.12s ease;
+}
+
+#box:hover {
+    background-color: var(--olive) !important;
+    color: #fff !important;
+    transform: scale(1.06);
+    z-index: 1;
+    position: relative;
+}
+
+#box:active {
+    transform: scale(0.97);
+}
+
+#value {
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Unrevealed — tan background, navy text */
+.uncovered {
+    background-color: var(--tan);
+    color: var(--navy);
+}
+
+/* Revealed — navy background, light text */
+.covered {
+    background-color: var(--navy);
+    color: var(--text-on-dark);
+    cursor: default;
+}
+
+.covered:hover {
+    background-color: var(--navy-dim, #001833) !important;
+    transform: none !important;
+}

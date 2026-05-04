@@ -1,0 +1,93 @@
+/* ── Get Map Size Page ──────────────────────────── */
+
+#get-map-size {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-page);
+    padding: 2em;
+}
+
+#get-map-size h1 {
+    color: var(--text-on-dark);
+    font-size: 2.4em;
+    margin-bottom: 0.25em;
+    letter-spacing: -0.5px;
+}
+
+#get-map-size .subtitle {
+    color: #c2cc9e;
+    font-size: 1em;
+    margin-bottom: 2.5em;
+}
+
+/* Form card */
+#map-size-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25em;
+    background-color: #fff;
+    padding: 2.25em 2em;
+    border-radius: 6px;
+    border: 2px solid var(--brown);
+    min-width: 320px;
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Labels */
+#map-size-form label {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.3em;
+}
+
+/* Inputs inherit from global styles.css */
+#map-size-form input {
+    color: var(--text-on-light);
+}
+
+/* Field groups */
+.field-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Button row */
+#buttons {
+    display: flex;
+    gap: 0.75em;
+    margin-top: 0.5em;
+}
+
+#buttons button {
+    flex: 1;
+}
+
+/* Change Role — brown */
+#change-role {
+    background-color: var(--brown);
+    color: var(--text-on-dark);
+    border-color: var(--brown);
+}
+#change-role:hover {
+    background-color: #2e1700;
+    border-color: #2e1700;
+}
+
+/* Generate Map — olive */
+#generate-map {
+    background-color: var(--olive);
+    color: #fff;
+    border-color: var(--olive);
+}
+#generate-map:hover {
+    background-color: var(--sage);
+    border-color: var(--sage);
+}

@@ -1,0 +1,40 @@
+<div class="simplex-page">
+    <header class="simplex-header">
+        <h1>Simplex Tableau</h1>
+        <button id="close-tableau" class="btn-secondary btn-small" (click)="closeSimplexTableau()">Close</button>
+    </header>
+
+    <section class="simplex-meta panel">
+        <h2 class="simplex-meta-title">Game Metadata</h2>
+        <table class="simplex-meta-table">
+            <tr>
+                <th>Status</th>
+                <td>{{ rows > 0 && columns > 0 ? 'Ready' : 'Waiting for setup' }}</td>
+            </tr>
+            <tr>
+                <th>Rows</th>
+                <td>{{ rows }}</td>
+            </tr>
+            <tr>
+                <th>Columns</th>
+                <td>{{ columns }}</td>
+            </tr>
+            <tr>
+                <th>Role</th>
+                <td>{{ role || 'Not selected' }}</td>
+            </tr>
+            <tr>
+                <th>Hider Score</th>
+                <td>{{ hiderScore }}</td>
+            </tr>
+            <tr>
+                <th>Seeker Score</th>
+                <td>{{ seekerScore }}</td>
+            </tr>
+        </table>
+    </section>
+
+    <section class="simplex-body panel">
+        <!-- Here will be the Simplex Tableau -->
+    </section>
+</div>

@@ -1,0 +1,14 @@
+<div id="matrix-generator">
+    <h1>Matrix Generator</h1>
+    <div id="matrix">
+        @for (row of matrix; track $index) {
+            <div class="row">
+                @for (box of row; track $index) {
+                    <div class="cell" [class.revealed]="box.revealed" [class.hider]="box.hider">
+                        {{ box.revealed ? (box.hider ? 'Person' : 'Bomb') : '?' }}
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,158 @@
+/* ── Game Page (score bar + board wrapper) ──────── */
+
+#game-page {
+    background-color: var(--bg-page);
+    min-height: 100vh;
+}
+
+/* ── Header / Score Bar ── */
+#game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 2em;
+    background-color: var(--brown);
+    border-bottom: 3px solid var(--tan);
+}
+
+#game-header h1 {
+    color: var(--text-on-dark);
+    font-size: 1.3em;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* Score cluster */
+#scores {
+    display: flex;
+    gap: 1.25em;
+    align-items: center;
+}
+
+.score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--navy);
+    border: 2px solid var(--tan);
+    border-radius: 4px;
+    padding: 0.4em 1.1em;
+    min-width: 110px;
+}
+
+.score-value p {
+    margin: 0;
+}
+
+/* ── Game Controls ── */
+#game-controls button {
+    background-color: var(--tan);
+    color: var(--navy);
+    border-color: var(--tan);
+    font-weight: 600;
+}
+
+#game-controls button:hover {
+    background-color: var(--olive);
+    border-color: var(--olive);
+    color: #fff;
+}
+
+/* ── Board area ── */
+/* Game page specific layout; uses shared tokens from global styles */
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    overflow: hidden;
+}
+
+.page-header {
+    display: flex;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+}
+
+.score-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    padding: 0.8rem 1rem;
+    min-height: 4.25rem;
+}
+
+.score-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06rem;
+    color: var(--tan);
+    margin-bottom: 0.12rem;
+}
+
+.score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.board-area {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    overflow: auto;
+}
+
+.meta-panel {
+    width: min(100%, 24rem);
+    padding: 1rem 1.1rem;
+}
+
+.meta-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-on-light);
+    font-size: 0.95rem;
+}
+
+.meta-table th,
+.meta-table td {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 0.08rem solid rgba(68, 34, 0, 0.18);
+    text-align: left;
+}
+
+.meta-table th {
+    width: 40%;
+    color: var(--brown);
+    font-weight: 700;
+}
+
+.page-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem 1rem;
+    flex: 0 0 auto;
+}
+
+.btn-small {
+    font-size: 0.875rem;
+    padding: 0.45rem 0.9rem;
+}
+
+@media (max-width: 640px) {
+    .page-footer { padding-inline: 0.75rem; }
+    .score-value { font-size: 1.1rem; }
+    .meta-panel { width: 100%; }
+}

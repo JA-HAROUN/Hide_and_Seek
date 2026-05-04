@@ -1,0 +1,58 @@
+/* app-root wrapper */
+app-root {
+  display: block;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+}
+
+/* ── Shared page layout ─────────────────────────── */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2em 1.5em;
+  background-color: var(--bg-page);
+}
+
+/* ── Shared card / box  ─────────────────────────── */
+.card {
+  background-color: #fff;
+  border: 2px solid var(--brown);
+  border-radius: 6px;
+  padding: 2.5em 2em;
+  width: 100%;
+  max-width: 440px;
+  color: var(--text-on-light);
+}
+
+.card h1,
+.card h2,i
+.card h3 {
+  color: var(--navy);
+}
+
+/* ── Score badge ─────────────────────────────────── */
+.score-badge {
+  background-color: var(--tan);
+  color: var(--text-on-light);
+  border: 2px solid var(--brown);
+  border-radius: 4px;
+  padding: 0.4em 1em;
+  text-align: center;
+}
+
+.score-badge .label {
+  font-size: 0.78em;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+}
+
+.score-badge .value {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--navy);
+}

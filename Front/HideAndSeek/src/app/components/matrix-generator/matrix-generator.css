@@ -1,0 +1,91 @@
+/* ── Matrix / Game Board Page ───────────────────── */
+
+#matrix-generator {
+  width: 100%;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: transparent;
+  min-height: 0;
+}
+
+#matrix-generator h1 {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  color: var(--text-on-dark);
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+}
+
+/* Outer border around the grid */
+#matrix {
+  display: inline-block;
+  border: 3px solid var(--brown);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  padding: 0.5rem;
+}
+
+.row {
+  display: flex;
+}
+
+/* ── Individual cell ── */
+.cell {
+  width: 3.75rem;
+  height: 3.75rem;
+  margin: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--brown);
+  font-weight: 600;
+  font-size: 0.9em;
+  letter-spacing: 0.2px;
+
+  /* Default: uncovered — tan */
+  background-color: var(--tan);
+  color: var(--navy);
+
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color            0.15s ease,
+    transform        0.12s ease;
+}
+
+.cell:hover {
+  background-color: var(--olive);
+  color: #fff;
+  transform: scale(1.06);
+  z-index: 1;
+  position: relative;
+}
+
+.cell:active {
+  transform: scale(0.97);
+}
+
+/* Covered (revealed) — olive/navy */
+.cell.revealed {
+  background-color: var(--navy);
+  color: var(--text-on-dark);
+  cursor: default;
+}
+
+.cell.revealed:hover {
+  background-color: var(--navy-dim, #001833);
+  transform: none;
+}
+
+/* Hider cell specifically revealed — sage tint */
+.cell.revealed.hider {
+  background-color: var(--sage);
+  color: #fff;
+}
+
+.cell.revealed.hider:hover {
+  background-color: var(--olive);
+}

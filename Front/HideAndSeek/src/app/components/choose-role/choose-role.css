@@ -1,0 +1,76 @@
+/* ── Choose Role Page ───────────────────────────── */
+
+#choose-role {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: var(--bg-page);
+    padding: 2em;
+}
+
+#choose-role h1 {
+    color: var(--text-on-dark);
+    font-size: 2.4em;
+    margin-bottom: 0.3em;
+    letter-spacing: -0.5px;
+}
+
+#choose-role .subtitle {
+    color: var(--olive-muted, #c2cc9e);
+    font-size: 1em;
+    margin-bottom: 2.5em;
+}
+
+/* Role card container */
+#roles {
+    display: flex;
+    gap: 1.25em;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Shared role button base */
+#roles button {
+    min-width: 130px;
+    padding: 1em 2em;
+    font-size: 1.05em;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Hider — olive */
+#hider {
+    background-color: var(--olive);
+    color: #fff;
+    border-color: var(--olive);
+}
+#hider:hover {
+    background-color: var(--sage);
+    border-color: var(--sage);
+}
+
+/* Third Person — tan */
+#third {
+    background-color: var(--tan);
+    color: var(--navy);
+    border-color: var(--tan);
+}
+#third:hover {
+    background-color: var(--olive);
+    border-color: var(--olive);
+    color: #fff;
+}
+
+/* Seeker — brown */
+#seeker {
+    background-color: var(--brown);
+    color: var(--text-on-dark);
+    border-color: var(--brown);
+}
+#seeker:hover {
+    background-color: var(--brown-dim, #2e1700);
+    border-color: var(--brown-dim, #2e1700);
+}

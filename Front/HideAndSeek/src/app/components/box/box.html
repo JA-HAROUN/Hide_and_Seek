@@ -1,0 +1,7 @@
+<div id="box" [ngClass]="(revealed ? 'covered' : 'uncovered')" (click)="reveal()">
+
+    <div id="value">
+        {{ revealed ? hider ? 'Person' : 'Bomb' : '?' }}
+    </div>
+
+</div>

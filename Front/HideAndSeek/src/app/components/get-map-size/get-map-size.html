@@ -1,0 +1,18 @@
+<div id="get-map-size">
+    <h1>Map Setup</h1>
+    <p class="subtitle">Set the grid dimensions</p>
+    <div id="map-size-form">
+        <div class="field-group">
+            <label for="rows">Rows</label>
+            <input type="number" id="rows" [value]="rows" (input)="rows = $any($event.target).valueAsNumber" min="1" max="50">
+        </div>
+        <div class="field-group">
+            <label for="columns">Columns</label>
+            <input type="number" id="columns" [value]="columns" (input)="columns = $any($event.target).valueAsNumber" min="1" max="50">
+        </div>
+        <div id="buttons">
+            <button id="change-role" (click)="changeRole()">Change Role</button>
+            <button id="generate-map" (click)="generateMatrix()">Generate Map</button>
+        </div>
+    </div>
+</div>
