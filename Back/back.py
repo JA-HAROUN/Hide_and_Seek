@@ -64,12 +64,30 @@ def solve_matrix(m):
     return matrix,res.x[1:]
 
 
-# def generate_place_and_compute(x, y, rows, cols):
+def generate_place_and_compute(x, y, rows, cols):
+    x1 = random.randint(1, rows) - 1
+    y1 = random.randint(1, cols) - 1
+    distance = abs(x-x1) + abs(y-y1)
+    if distance == 0:
+        return #return the score and the seeker wins
+    elif distance == 1:
+        return #return the score multiplied by 0.5 and the hider wins
+    elif distance == 2:
+        return #return the score multiplied by 0.75 and the hider wins
+    else:
+        return #return the score multiplied by 1 and the hider wins
 
 
 
 
-
+#def main (x,y,isHidder):
+#m = generate_matrix(x,y)
+#solve_matrix(m)
+#send_results
+#recive_data
+#generate_place
+#calculate validity
+#compute score
 
 def test_generate_matrix_shape():
     for n, m in [(2, 2), (3, 4), (1, 5), (5, 1)]:
@@ -146,3 +164,5 @@ if __name__ == "__main__":
     test_solve_matrix_diagonal_values()
     test_solve_matrix_non_square()
     print("\nAll tests passed ✓")
+
+
