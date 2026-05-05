@@ -20,6 +20,9 @@ export class MatrixGenerator implements OnDestroy {
 
   isBoardFlipped: boolean = false;
   isWaitingForSequence: boolean = false;
+
+  isSimulating: boolean = false;
+  simulationResults: any = null;
   @ViewChildren(Box) boxComponents!: QueryList<Box>;
 
   constructor(private gameData: GameData, private controller: Controller) {
@@ -32,15 +35,21 @@ export class MatrixGenerator implements OnDestroy {
         // FIX: Update the class property 'this.currentRole' directly!
         this.currentRole = this.gameData.getCurrentRole() || 'seeker';
 
-        if (this.currentRole === 'hider') {
-          // Wait half a second after the board loads, then flip them all to plain side!
-          setTimeout(() => this.isBoardFlipped = true, 500);
+        if (this.currentRole === 'third') {
+          this.isSimulating = true;
+          // Ask backend to run 100 rounds
+          this.simulationResults = await this.controller.runSimulation(s.rows, s.columns);
+          this.isSimulating = false;
         }
-        // Use 'this.currentRole' here instead of a local variable
-        const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
-
-        if (realGrid) {
-          this.setMatrixValues(realGrid);
+        // --- THE INTERACTIVE BRANCH (Hider/Seeker) ---
+        else {
+          if (this.currentRole === 'hider') {
+            setTimeout(() => this.isBoardFlipped = true, 500);
+          }
+          const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
+          if (realGrid) {
+            this.setMatrixValues(realGrid);
+          }
         }
       }
     });

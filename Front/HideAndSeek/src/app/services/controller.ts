@@ -111,6 +111,23 @@ export class Controller {
     }
   }
 
+  async runSimulation(rows: number, columns: number) {
+    try {
+      // Tell Flask to instantly simulate 100 rounds
+      const response = await fetch('http://localhost:5000/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns, rounds: 100 })
+      });
+
+      const simulationData = await response.json();
+      return simulationData;
+
+    } catch (error) {
+      console.error("Simulation failed!", error);
+      return null;
+    }
+  }
   async playHiderTurn(hiddenRow: number, hiddenCol: number) {
     const payload = {
       hidden_row: hiddenRow,

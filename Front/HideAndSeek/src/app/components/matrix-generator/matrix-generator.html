@@ -1,20 +1,60 @@
-<div class="matrix-container">
-  <!-- Grab the row index -->
-  @for (row of matrix; track $index; let rowIndex = $index) {
-    <div class="matrix-row">
 
-      <!-- Grab the column index -->
-      @for (cell of row; track cell.value; let colIndex = $index) {
+@if (currentRole === 'third') {
+  <div class="simulation-screen">
 
-        <!-- Listen for the event and pass the coordinates -->
-        <app-box
-          [data]="cell"
-          [role]="currentRole"
-          [isFlipped]="isBoardFlipped"
-          (boxClicked)="handleBoxClick(rowIndex, colIndex)">
-        </app-box>
+    @if (isSimulating) {
+      <div class="loading-state fade-in">
+        <h2>The Quartermaster is calculating 100 voyages...</h2>
+        <div class="spinner">⏳</div>
+      </div>
+    }
 
-      }
-    </div>
-  }
-</div>
+    @if (!isSimulating && simulationResults) {
+      <div class="results-board fade-in">
+        <h2>📜 Quartermaster's Log: 100 Rounds Completed</h2>
+
+        <table class="sim-table">
+          <thead>
+          <tr>
+            <th>Crew</th>
+            <th>Rounds Won</th>
+            <th>Total Plunder (Score)</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td><strong>Hider (Computer)</strong></td>
+            <td>{{ simulationResults.hider_wins }}</td>
+            <td>{{ simulationResults.hider_score }}</td>
+          </tr>
+          <tr>
+            <td><strong>Seeker (Computer)</strong></td>
+            <td>{{ simulationResults.seeker_wins }}</td>
+            <td>{{ simulationResults.seeker_score }}</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <!-- Button to play again -->
+        <button class="btn-primary" (click)="generateMatrix(matrix.length, matrix[0].length)">Simulate Another 100</button>
+      </div>
+    }
+  </div>
+}
+@else {
+
+  <div class="matrix-container">
+    @for (row of matrix; track $index; let rowIndex = $index) {
+      <div class="matrix-row">
+        @for (cell of row; track cell.value; let colIndex = $index) {
+          <app-box
+            [data]="cell"
+            [role]="currentRole"
+            [isFlipped]="isBoardFlipped"
+            (boxClicked)="handleBoxClick(rowIndex, colIndex)">
+          </app-box>
+        }
+      </div>
+    }
+  </div>
+}
