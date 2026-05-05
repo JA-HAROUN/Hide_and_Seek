@@ -110,4 +110,37 @@ export class Controller {
       console.error("Error communicating with backend:", error);
     }
   }
+
+  async playHiderTurn(hiddenRow: number, hiddenCol: number) {
+    const payload = {
+      hidden_row: hiddenRow,
+      hidden_col: hiddenCol,
+      ...this.getSnapshot()
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/api/computer-guess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      // Update scores
+      if (data.updated_scores) {
+        // update logic...
+      }
+
+      // Return the computer's guess coordinates so the UI can animate them
+      return {
+        row: data.computer_guess_row,
+        col: data.computer_guess_col,
+        found: data.found_treasure
+      };
+    } catch (error) {
+      console.error("Backend connection failed", error);
+      return null;
+    }
+  }
 }

@@ -10,7 +10,7 @@
     >
       <!-- Inside your wooden box div -->
       <div id="value" class="box-number">{{ data.value }}</div>
-      <button type="button" (click)="reveal()" class="reveal-btn" [attr.aria-label]="'Open box ' + data.value">Click to reveal</button>
+      <button type="button" (click)="userClick()" class="reveal-btn" [attr.aria-label]="'Open box ' + data.value">Click to reveal</button>
 
       <!-- Inside your treasure container -->
       <div class="treasure-number">{{ data.value }}</div>

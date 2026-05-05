@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef, Output, EventEmitter} from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -8,10 +8,10 @@ import { NgClass } from '@angular/common';
   styleUrl: './box.css',
 })
 export class Box {
-  // 1. Accept the plain data object as an input
   @Input() data!: { value: number, hider: boolean };
-
+  @Input() role: string = 'seeker'; // Receive the current role
   @Output() boxClicked = new EventEmitter<void>();
+
   revealed: boolean = false;
   state: 'unsmashed' | 'smashing' | 'treasure' | 'bomb' | 'explosion' | 'hidden' = 'unsmashed';
   treasureGifPath = '/assets/treasure-chest.gif';
@@ -20,30 +20,49 @@ export class Box {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
-  // 2. The reveal method now reads directly from the data input
-  reveal() {
+  // 1. Handle what happens when the HUMAN clicks the box
+  userClick() {
     if (this.state !== 'unsmashed') return;
-
     this.boxClicked.emit();
+
+    if (this.role === 'hider') {
+      // HIDER MODE: User is burying the treasure
+      this.revealed = true;
+      this.state = 'treasure';
+      this.message = 'Treasure buried! Waiting for computer...';
+      this.cdr.detectChanges();
+    } else {
+      // SEEKER MODE: User is smashing the box
+      this.animateSmash(this.data.hider);
+    }
+  }
+
+  // 2. A new method so the parent can force the computer's guess to animate
+  animateComputerGuess(foundTreasure: boolean) {
+    if (this.state !== 'treasure') {
+      this.state = 'unsmashed'; // Ensure it starts from unsmashed if it was empty
+    }
+    this.animateSmash(foundTreasure, true);
+  }
+
+  // 3. The core animation logic (reused by both human and computer)
+  private animateSmash(isTreasure: boolean, isComputerMove: boolean = false) {
     this.revealed = true;
     this.state = 'smashing';
     this.cdr.detectChanges();
 
-    // Read the hider status from the injected data
-    const isHider = this.data.hider;
-
     setTimeout(() => {
-      if (isHider) {
+      if (isTreasure) {
         this.state = 'treasure';
-        this.message = 'ARRR! Found the treasure!';
+        this.message = isComputerMove ? 'Oh no! The computer found yer treasure!' : 'ARRR! Found the treasure!';
       } else {
         this.state = 'bomb';
-        this.message = 'BOOM! You hit a booby trap! Pieces of eight scattered...';
+        this.message = isComputerMove ? 'Computer hit a booby trap! Yer treasure is safe.' : 'BOOM! You hit a booby trap!';
       }
       this.cdr.detectChanges();
     }, 600);
 
-    if (!isHider) {
+    if (!isTreasure) {
       setTimeout(() => {
         this.state = 'explosion';
         this.cdr.detectChanges();

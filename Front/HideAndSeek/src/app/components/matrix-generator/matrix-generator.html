@@ -9,6 +9,7 @@
         <!-- Listen for the event and pass the coordinates -->
         <app-box
           [data]="cell"
+          [role]="currentRole"
           (boxClicked)="handleBoxClick(rowIndex, colIndex)">
         </app-box>
 
