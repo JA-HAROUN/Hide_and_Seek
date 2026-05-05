@@ -18,6 +18,8 @@ export class MatrixGenerator implements OnDestroy {
   currentRole: string = 'seeker';
   private sub: Subscription | null = null;
 
+  isBoardFlipped: boolean = false;
+  isWaitingForSequence: boolean = false;
   @ViewChildren(Box) boxComponents!: QueryList<Box>;
 
   constructor(private gameData: GameData, private controller: Controller) {
@@ -30,6 +32,10 @@ export class MatrixGenerator implements OnDestroy {
         // FIX: Update the class property 'this.currentRole' directly!
         this.currentRole = this.gameData.getCurrentRole() || 'seeker';
 
+        if (this.currentRole === 'hider') {
+          // Wait half a second after the board loads, then flip them all to plain side!
+          setTimeout(() => this.isBoardFlipped = true, 500);
+        }
         // Use 'this.currentRole' here instead of a local variable
         const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
 
@@ -41,17 +47,37 @@ export class MatrixGenerator implements OnDestroy {
   }
 
   async handleBoxClick(row: number, col: number) {
+    if (this.isWaitingForSequence) return; // Prevent double clicking during animation
+
     if (this.currentRole === 'seeker') {
       this.controller.revealBox(row, col);
     }
     else if (this.currentRole === 'hider') {
-      console.log(`User hid treasure at Row ${row}, Col ${col}`);
+      if (!this.isBoardFlipped) return; // User must wait for the board to flip first
 
-      const computerGuess = await this.controller.playHiderTurn(row, col);
+      this.isWaitingForSequence = true; // Lock the board
+      console.log(`User hiding treasure at Row ${row}, Col ${col}`);
 
-      if (computerGuess) {
-        this.animateComputerMove(computerGuess.row, computerGuess.col, computerGuess.found);
-      }
+      // 1. Show the "burying treasure" animation on the clicked box
+      const boxIndex = (row * this.matrix[0].length) + col;
+      const targetBox = this.boxComponents.toArray()[boxIndex];
+      targetBox.showBuryAnimation();
+
+      // 2. Wait 1.2 seconds for the bury animation to finish, then FLIP BOARD BACK
+      setTimeout(async () => {
+        this.isBoardFlipped = false; // This rotates all boxes back to numbers
+
+        // 3. Wait 0.8 seconds for the flip animation to finish, THEN ask computer to guess
+        setTimeout(async () => {
+          const computerGuess = await this.controller.playHiderTurn(row, col);
+
+          if (computerGuess) {
+            // 4. Smash the box the computer guessed!
+            this.animateComputerMove(computerGuess.row, computerGuess.col, computerGuess.found);
+          }
+          this.isWaitingForSequence = false; // Unlock board
+        }, 800);
+      }, 1200);
     }
   }
 

@@ -12,6 +12,7 @@ export class Box {
   @Input() role: string = 'seeker'; // Receive the current role
   @Output() boxClicked = new EventEmitter<void>();
 
+  @Input() isFlipped: boolean = false;
   revealed: boolean = false;
   state: 'unsmashed' | 'smashing' | 'treasure' | 'bomb' | 'explosion' | 'hidden' = 'unsmashed';
   treasureGifPath = '/assets/treasure-chest.gif';
@@ -23,18 +24,16 @@ export class Box {
   // 1. Handle what happens when the HUMAN clicks the box
   userClick() {
     if (this.state !== 'unsmashed') return;
+
+    // Always tell the parent component a click happened
     this.boxClicked.emit();
 
-    if (this.role === 'hider') {
-      // HIDER MODE: User is burying the treasure
-      this.revealed = true;
-      this.state = 'treasure';
-      this.message = 'Treasure buried! Waiting for computer...';
-      this.cdr.detectChanges();
-    } else {
-      // SEEKER MODE: User is smashing the box
+    // ONLY animate locally if we are the Seeker.
+    if (this.role === 'seeker') {
       this.animateSmash(this.data.hider);
     }
+    // If we are the Hider, we do NOTHING else here!
+    // MatrixGenerator will hear the emit() and call showBuryAnimation() on its own schedule.
   }
 
   // 2. A new method so the parent can force the computer's guess to animate
@@ -44,7 +43,18 @@ export class Box {
     }
     this.animateSmash(foundTreasure, true);
   }
+  showBuryAnimation() {
+    this.state = 'treasure';
+    this.message = 'Burying treasure...';
+    this.cdr.detectChanges();
 
+    // After 1 second, turn back into an unsmashed box (so the board can flip back)
+    setTimeout(() => {
+      this.state = 'unsmashed';
+      this.message = null;
+      this.cdr.detectChanges();
+    }, 1000);
+  }
   // 3. The core animation logic (reused by both human and computer)
   private animateSmash(isTreasure: boolean, isComputerMove: boolean = false) {
     this.revealed = true;

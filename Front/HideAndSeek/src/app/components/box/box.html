@@ -1,61 +1,54 @@
-<div id="box-container">
-  <!-- Wooden Box -->
+<div class="box-container">
+
+  <!-- 1. The Single Wooden Box -->
   @if (state === 'unsmashed' || state === 'smashing') {
     <div
-      id="box"
+      class="wooden-box box"
       [ngClass]="{
-                'wooden-box': true,
-                'smashing': state === 'smashing'
-            }"
+          'smashing': state === 'smashing',
+          'flipped': isFlipped
+      }"
     >
-      <!-- Inside your wooden box div -->
-      <div id="value" class="box-number">{{ data.value }}</div>
+      <!-- Only show the number if it is NOT flipped -->
+      @if (!isFlipped) {
+        <div class="box-number value">{{ data.value }}</div>
+      }
+
       <button type="button" (click)="userClick()" class="reveal-btn" [attr.aria-label]="'Open box ' + data.value">Click to reveal</button>
-
-      <!-- Inside your treasure container -->
-      <div class="treasure-number">{{ data.value }}</div>
-
-      <!-- Inside your number-only container -->
-      <div id="number-only" class="fade-in">
-        {{ data.value }}
-      </div>
     </div>
   }
 
-  <!-- Treasure Chest -->
+  <!-- 2. Treasure Chest -->
   @if (state === 'treasure') {
-    <div id="treasure-container" class="reveal-animation">
-      <img [src]="treasureGifPath" alt="Treasure Chest" id="treasure-gif" />
-      <!-- Use displayBox.value here -->
+    <div class="treasure-container reveal-animation">
+      <img [src]="treasureGifPath" alt="Treasure Chest" class="treasure-gif" />
       <div class="treasure-number">{{ data.value }}</div>
     </div>
   }
 
-  <!-- Bomb and Explosion -->
+  <!-- 3. Bomb and Explosion -->
   @if (state === 'bomb' || state === 'explosion') {
-    <div id="bomb-container" [ngClass]="{ 'exploding': state === 'explosion' }">
+    <div class="bomb-container" [ngClass]="{ 'exploding': state === 'explosion' }">
       @if (state === 'explosion') {
         <img
           [src]="bombGifPath"
           alt="Bomb Explosion"
-          id="bomb-gif"
-          class="explosion-animation" />
+          class="bomb-gif explosion-animation" />
       }
       @if (state === 'bomb') {
-        <div id="bomb" class="bomb-sprite"></div>
+        <div class="bomb-sprite"></div>
       }
     </div>
   }
 
-  <!-- Number Only -->
+  <!-- 4. Number Only -->
   @if (state === 'hidden') {
-    <div id="number-only" class="fade-in">
-      <!-- Use displayBox.value here -->
+    <div class="number-only fade-in">
       {{ data.value }}
     </div>
   }
 
-  <!-- Pirate Message -->
+  <!-- 5. Pirate Message -->
   @if (message) {
     <div class="pirate-toast">
       {{ message }}

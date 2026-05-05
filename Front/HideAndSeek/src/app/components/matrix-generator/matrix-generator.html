@@ -10,6 +10,7 @@
         <app-box
           [data]="cell"
           [role]="currentRole"
+          [isFlipped]="isBoardFlipped"
           (boxClicked)="handleBoxClick(rowIndex, colIndex)">
         </app-box>
 
