@@ -2,63 +2,83 @@ import numpy as np
 from scipy.optimize import linprog
 import random
 
+from enum import Enum
 
+class Player(Enum):
+    SEEKER = 1
+    HIDER = 2
+    THIRD = 3
 
-def generate_matrix(n,m):
-    list = []
+class Game:
+    def __init__(self, rows, cols):
+        self.rows = rows
+        self.cols = cols
+        self.matrix = None
+        self.pay_matrix = None
+        self.probabilities = None
+        self.strategy = None
+        self.hider_position = None
 
-    for x in range(n):
-        for y in range(m):
-            list.append(random.choice([1, 2, 3]))
+        self.hider_score = 0
+        self.seeker_score = 0
+        
+        self.generate_matrix()
+        self.solve_matrix()
 
-    temp = np.array(list)
-
-    matrix = temp.reshape(n,m)
-
-    return matrix
-
-
-def solve_matrix(m):
-    rows, cols = len(m), len(m[0])
-
-    pay_matrix=[]
-    for x in range(rows):
-        for y in range(cols):
-            if y == x:
-                if m[x][y] == 3:
-                    pay_matrix.append(-3)
+    def generate_matrix(self):
+        list_vals = []
+        
+        for _ in range(self.rows):
+            for _ in range(self.cols):
+                list_vals.append(random.choice([1, 2, 3]))
+                
+        temp = np.array(list_vals)
+        
+        self.matrix = temp.reshape(self.rows, self.cols)
+        
+    def solve_matrix(self):
+        # Treat all cells as a flattened 1D array of strategies
+        m_flat = self.matrix.flatten()
+        num_cells = self.rows * self.cols
+        
+        pay_matrix=[]
+        for x in range(num_cells):  # Seeker chooses a cell
+            for y in range(num_cells):  # Hider chooses a cell
+                if y == x:
+                    if m_flat[x] == 3:
+                        pay_matrix.append(-3)
+                    else:
+                        pay_matrix.append(-1)
                 else:
-                    pay_matrix.append(-1)
-            else:
-                if m[x][y] == 3:
-                    pay_matrix.append(1)
-                elif m[x][y] == 2:
-                    pay_matrix.append(2)
-                else:
-                    pay_matrix.append(1)
+                    if m_flat[y] == 3:
+                        pay_matrix.append(1)
+                    elif m_flat[y] == 2:
+                        pay_matrix.append(2)
+                    else:
+                        pay_matrix.append(1)
+                        
+        self.pay_matrix = np.array(pay_matrix).reshape(num_cells, num_cells)
+        
+        A = self.pay_matrix
+        m_rows, n_cols = A.shape
 
-    matrix = np.array(pay_matrix).reshape(rows, cols)
+        c = [-1] + [0]*m_rows  
 
-    A = matrix
-    m, n = A.shape
+        # constraints
+        A_ub = []
+        b_ub = []
 
-    c = [-1] + [0]*m
+        for j in range(n_cols):
+            constraint = [1] + list(-A[:, j])
+            A_ub.append(constraint)
+            b_ub.append(0)
 
-    # constraints
-    A_ub = []
-    b_ub = []
+        A_eq = [[0] + [1]*m_rows]
+        b_eq = [1]
 
-    for j in range(n):
-        constraint = [1] + list(-A[:, j])
-        A_ub.append(constraint)
-        b_ub.append(0)
+        bounds = [(None, None)] + [(0, 1)]*m_rows
 
-    A_eq = [[0] + [1]*m]
-    b_eq = [1]
-
-    bounds = [(None, None)] + [(0, 1)]*m
-
-    res = linprog(c, A_ub, b_ub, A_eq, b_eq, bounds=bounds)
+        res = linprog(c, A_ub, b_ub, A_eq, b_eq, bounds=bounds)
 
 
     return matrix,res.x[1:]
@@ -154,15 +174,15 @@ def test_solve_matrix_non_square():
 
 
 # ── run all tests ──────────────────────────────────────────────────────────────
-
+ 
 if __name__ == "__main__":
-    test_generate_matrix_shape()
-    test_generate_matrix_values()
-    test_solve_matrix_strategy_sums_to_one()
-    test_solve_matrix_probabilities_non_negative()
-    test_solve_matrix_pay_matrix_shape()
-    test_solve_matrix_diagonal_values()
-    test_solve_matrix_non_square()
+    Game.test_generate_matrix_shape()
+    Game.test_generate_matrix_values()
+    Game.test_solve_matrix_strategy_sums_to_one()
+    Game.test_solve_matrix_probabilities_non_negative()
+    Game.test_solve_matrix_pay_matrix_shape()
+    Game.test_solve_matrix_diagonal_values()
+    Game.test_solve_matrix_non_square()
     print("\nAll tests passed ✓")
 
 

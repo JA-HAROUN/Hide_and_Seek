@@ -56,6 +56,8 @@ export class Controller {
     this.gameData.setMatrix(nextMatrix);
 
     // Create the snapshot and append the specific move made
+    // Move snapshot generation after matrix update ensures it captures the newest state if needed,
+    // though the server logic strictly utilizes clicked_row and clicked_col
     const snapshot = this.getSnapshot();
     const payload = {
       ...snapshot,
@@ -64,9 +66,9 @@ export class Controller {
     };
 
     // Send the move to Flask and await the updated scores
-    await this.sendDataToBack(payload);
+    const responseData = await this.sendDataToBack(payload);
 
-    return nextMatrix[row][column];
+    return responseData ? nextMatrix[row][column] : null;
   }
 
   getSnapshot(): GameSnapshot {
@@ -97,9 +99,10 @@ export class Controller {
       const responseData = await response.json();
 
       // Update the Angular frontend with the new scores calculated by Flask
-      if (responseData.updated_scores) {
-        const hiderDelta = responseData.updated_scores.hider - this.gameData.getCurrentScores().hider;
-        const seekerDelta = responseData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
+      if (responseData && responseData.updated_scores) {
+        const currentScores = this.gameData.getCurrentScores();
+        const hiderDelta = responseData.updated_scores.hider - currentScores.hider;
+        const seekerDelta = responseData.updated_scores.seeker - currentScores.seeker;
 
         if (hiderDelta !== 0) this.updateScore('hider', hiderDelta);
         if (seekerDelta !== 0) this.updateScore('seeker', seekerDelta);
