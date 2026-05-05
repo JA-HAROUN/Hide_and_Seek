@@ -1,14 +1,18 @@
-<div id="matrix-generator">
-    <h1>Matrix Generator</h1>
-    <div id="matrix">
-        @for (row of matrix; track $index) {
-            <div class="row">
-                @for (box of row; track $index) {
-                    <div class="cell" [class.revealed]="box.revealed" [class.hider]="box.hider">
-                        {{ box.revealed ? (box.hider ? 'Person' : 'Bomb') : '?' }}
-                    </div>
-                }
-            </div>
-        }
+<div class="matrix-container">
+  <!-- Grab the row index -->
+  @for (row of matrix; track $index; let rowIndex = $index) {
+    <div class="matrix-row">
+
+      <!-- Grab the column index -->
+      @for (cell of row; track cell.value; let colIndex = $index) {
+
+        <!-- Listen for the event and pass the coordinates -->
+        <app-box
+          [data]="cell"
+          (boxClicked)="handleBoxClick(rowIndex, colIndex)">
+        </app-box>
+
+      }
     </div>
+  }
 </div>

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { GameData } from './game-data';
-import { GameBox } from '../models/game-box';
 import { GameSnapshot } from '../models/game-snapshot';
 
 @Injectable({
@@ -13,7 +12,37 @@ export class Controller {
     this.gameData.updateScore(who, delta);
   }
 
-  revealBox(row: number, column: number) {
+  async startGame(rows: number, columns: number, role: string) {
+    try {
+      // 1. Tell Flask to build the board and do the math
+      const response = await fetch('http://localhost:5000/api/setup-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns, role })
+      });
+
+      const backendData = await response.json();
+
+      // 2. Save the math to GameData for the Tableau
+      this.gameData.setSimplexData(
+        backendData.payoff_matrix,
+        backendData.primal,
+        backendData.dual,
+        backendData.hider_probs,
+        backendData.seeker_probs
+      );
+
+      // 3. Return the actual box grid (where the hider is) to draw the map
+      return backendData.grid_layout; // Array of {value, hider: true/false}
+
+    } catch (error) {
+      console.error("Failed to connect to backend Ahoy!", error);
+      return null;
+    }
+  }
+
+  // Changed to async to handle the backend call immediately upon revealing
+  async revealBox(row: number, column: number) {
     const matrix = this.gameData.getCurrentMatrix();
     if (!matrix[row] || !matrix[row][column]) {
       return null;
@@ -25,6 +54,18 @@ export class Controller {
 
     nextMatrix[row][column].revealed = true;
     this.gameData.setMatrix(nextMatrix);
+
+    // Create the snapshot and append the specific move made
+    const snapshot = this.getSnapshot();
+    const payload = {
+      ...snapshot,
+      clicked_row: row,
+      clicked_col: column
+    };
+
+    // Send the move to Flask and await the updated scores
+    await this.sendDataToBack(payload);
+
     return nextMatrix[row][column];
   }
 
@@ -37,19 +78,36 @@ export class Controller {
     };
   }
 
-  async sendDataToBack(snapshot: GameSnapshot = this.getSnapshot()) {
-    const response = await fetch('/api/game-state', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(snapshot),
-    });
+  // Updated to point to the correct URL and handle the incoming JSON response
+  async sendDataToBack(payload: any) {
+    try {
 
-    if (!response.ok) {
-      throw new Error(`Failed to send game state: ${response.status}`);
+      const response = await fetch('http://localhost:5000/api/game-state', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send game state: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      // Update the Angular frontend with the new scores calculated by Flask
+      if (responseData.updated_scores) {
+        const hiderDelta = responseData.updated_scores.hider - this.gameData.getCurrentScores().hider;
+        const seekerDelta = responseData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
+
+        if (hiderDelta !== 0) this.updateScore('hider', hiderDelta);
+        if (seekerDelta !== 0) this.updateScore('seeker', seekerDelta);
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error("Error communicating with backend:", error);
     }
-
-    return response;
   }
 }

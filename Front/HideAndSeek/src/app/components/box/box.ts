@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Output, EventEmitter} from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -8,30 +8,57 @@ import { NgClass } from '@angular/common';
   styleUrl: './box.css',
 })
 export class Box {
-  @Input() box: Box | null = null;
-  value: number | null = null;
-  hider: boolean | null = null;
+  // 1. Accept the plain data object as an input
+  @Input() data!: { value: number, hider: boolean };
+
+  @Output() boxClicked = new EventEmitter<void>();
   revealed: boolean = false;
+  state: 'unsmashed' | 'smashing' | 'treasure' | 'bomb' | 'explosion' | 'hidden' = 'unsmashed';
+  treasureGifPath = '/assets/treasure-chest.gif';
+  bombGifPath = '/assets/bomb-explosion.gif';
+  message: string | null = null;
 
-  get displayBox(): Box {
-    return this.box ?? this;
-  }
+  constructor(private cdr: ChangeDetectorRef) {}
 
-  constructor() {
-    this.value = null;
-    this.hider = null;
-    this.revealed = false;
-  }
-
-  // Method to set the value of the box
-  setValue(value: number, hider: boolean) {
-    this.value = value;
-    this.hider = hider;
-  }
-
-  // Method to reveal the box
+  // 2. The reveal method now reads directly from the data input
   reveal() {
+    if (this.state !== 'unsmashed') return;
+
+    this.boxClicked.emit();
     this.revealed = true;
+    this.state = 'smashing';
+    this.cdr.detectChanges();
+
+    // Read the hider status from the injected data
+    const isHider = this.data.hider;
+
+    setTimeout(() => {
+      if (isHider) {
+        this.state = 'treasure';
+        this.message = 'ARRR! Found the treasure!';
+      } else {
+        this.state = 'bomb';
+        this.message = 'BOOM! You hit a booby trap! Pieces of eight scattered...';
+      }
+      this.cdr.detectChanges();
+    }, 600);
+
+    if (!isHider) {
+      setTimeout(() => {
+        this.state = 'explosion';
+        this.cdr.detectChanges();
+      }, 1200);
+
+      setTimeout(() => {
+        this.state = 'hidden';
+        this.message = null;
+        this.cdr.detectChanges();
+      }, 2200);
+    } else {
+      setTimeout(() => {
+        this.message = null;
+        this.cdr.detectChanges();
+      }, 3000);
+    }
   }
-  
 }

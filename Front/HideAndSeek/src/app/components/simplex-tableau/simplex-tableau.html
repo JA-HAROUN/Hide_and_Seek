@@ -1,40 +1,107 @@
 <div class="simplex-page">
-    <header class="simplex-header">
-        <h1>Simplex Tableau</h1>
-        <button id="close-tableau" class="btn-secondary btn-small" (click)="closeSimplexTableau()">Close</button>
-    </header>
+  <header class="simplex-header">
+    <h1>Simplex Tableau</h1>
+    <button id="close-tableau" class="btn-secondary btn-small" (click)="closeSimplexTableau()">Close</button>
+  </header>
 
-    <section class="simplex-meta panel">
-        <h2 class="simplex-meta-title">Game Metadata</h2>
-        <table class="simplex-meta-table">
-            <tr>
-                <th>Status</th>
-                <td>{{ rows > 0 && columns > 0 ? 'Ready' : 'Waiting for setup' }}</td>
-            </tr>
-            <tr>
-                <th>Rows</th>
-                <td>{{ rows }}</td>
-            </tr>
-            <tr>
-                <th>Columns</th>
-                <td>{{ columns }}</td>
-            </tr>
-            <tr>
-                <th>Role</th>
-                <td>{{ role || 'Not selected' }}</td>
-            </tr>
-            <tr>
-                <th>Hider Score</th>
-                <td>{{ hiderScore }}</td>
-            </tr>
-            <tr>
-                <th>Seeker Score</th>
-                <td>{{ seekerScore }}</td>
-            </tr>
-        </table>
-    </section>
+  <section class="simplex-meta panel">
+    <h2 class="simplex-meta-title">Game Metadata</h2>
+    <table class="simplex-meta-table">
+      <tr>
+        <th>Status</th>
+        <td>{{ totalPlaces > 0 ? 'Ready' : 'Waiting for setup' }}</td>
+      </tr>
+      <tr>
+        <th>Map Size</th>
+        <td>{{ rows }} x {{ columns }} ({{ totalPlaces }} places)</td>
+      </tr>
+      <tr>
+        <th>Role</th>
+        <td>{{ role || 'Not selected' }}</td>
+      </tr>
+      <tr>
+        <th>Hider Score</th>
+        <td>{{ hiderScore }}</td>
+      </tr>
+      <tr>
+        <th>Seeker Score</th>
+        <td>{{ seekerScore }}</td>
+      </tr>
+    </table>
+  </section>
 
-    <section class="simplex-body panel">
-        <!-- Here will be the Simplex Tableau -->
+
+  <!-- Linear Programming Formulation Section -->
+  @if (primalProblem && dualProblem) {
+    <section class="lp-section panel">
+      <h2>Linear Programming Formulation</h2>
+
+      <div class="lp-container">
+        <!-- Primal Problem -->
+        <div class="lp-block">
+          <h3>Primal Problem (Hider)</h3>
+          <div class="math-equation highlight-objective">
+            {{ primalProblem.objective }}
+          </div>
+          <div class="math-constraints">
+            @for (constraint of primalProblem.constraints; track $index) {
+              <div class="constraint-line">{{ constraint }}</div>
+            }
+          </div>
+        </div>
+
+        <!-- Dual Problem -->
+        <div class="lp-block">
+          <h3>Dual Problem (Seeker)</h3>
+          <div class="math-equation highlight-objective">
+            {{ dualProblem.objective }}
+          </div>
+          <div class="math-constraints">
+            @for (constraint of dualProblem.constraints; track $index) {
+              <div class="constraint-line">{{ constraint }}</div>
+            }
+          </div>
+        </div>
+      </div>
     </section>
+  }
+  <!-- The New Payoff Matrix Section -->
+  <section class="simplex-body panel">
+    <h2>Payoff Matrix & Probabilities</h2>
+
+    <div class="table-container">
+      <table class="matrix-table">
+        <thead>
+        <tr>
+          <th class="empty-corner">H \ S</th>
+          <!-- Seeker Columns (y probabilities) -->
+          @for (col of seekerProbs; track $index) {
+            <th>
+              S{{ $index + 1 }}
+              <div class="prob-label">y{{ $index + 1 }} = {{ col | number:'1.2-2' }}</div>
+            </th>
+          }
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Hider Rows (x probabilities) -->
+          @for (row of payoffMatrix; track rowIndex; let rowIndex = $index) {
+            <tr>
+              <th class="row-header">
+                H{{ rowIndex + 1 }}
+                <div class="prob-label">x{{ rowIndex + 1 }} = {{ hiderProbs[rowIndex] | number:'1.2-2' }}</div>
+              </th>
+
+              <!-- Matrix Values -->
+              @for (val of row; track colIndex; let colIndex = $index) {
+                <td [class.negative]="val < 0" [class.positive]="val > 0">
+                  {{ val }}
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
 </div>

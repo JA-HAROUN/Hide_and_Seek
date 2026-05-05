@@ -1,7 +1,64 @@
-<div id="box" [ngClass]="(revealed ? 'covered' : 'uncovered')" (click)="reveal()">
+<div id="box-container">
+  <!-- Wooden Box -->
+  @if (state === 'unsmashed' || state === 'smashing') {
+    <div
+      id="box"
+      [ngClass]="{
+                'wooden-box': true,
+                'smashing': state === 'smashing'
+            }"
+    >
+      <!-- Inside your wooden box div -->
+      <div id="value" class="box-number">{{ data.value }}</div>
+      <button type="button" (click)="reveal()" class="reveal-btn" [attr.aria-label]="'Open box ' + data.value">Click to reveal</button>
 
-    <div id="value">
-        {{ revealed ? hider ? 'Person' : 'Bomb' : '?' }}
+      <!-- Inside your treasure container -->
+      <div class="treasure-number">{{ data.value }}</div>
+
+      <!-- Inside your number-only container -->
+      <div id="number-only" class="fade-in">
+        {{ data.value }}
+      </div>
     </div>
+  }
 
+  <!-- Treasure Chest -->
+  @if (state === 'treasure') {
+    <div id="treasure-container" class="reveal-animation">
+      <img [src]="treasureGifPath" alt="Treasure Chest" id="treasure-gif" />
+      <!-- Use displayBox.value here -->
+      <div class="treasure-number">{{ data.value }}</div>
+    </div>
+  }
+
+  <!-- Bomb and Explosion -->
+  @if (state === 'bomb' || state === 'explosion') {
+    <div id="bomb-container" [ngClass]="{ 'exploding': state === 'explosion' }">
+      @if (state === 'explosion') {
+        <img
+          [src]="bombGifPath"
+          alt="Bomb Explosion"
+          id="bomb-gif"
+          class="explosion-animation" />
+      }
+      @if (state === 'bomb') {
+        <div id="bomb" class="bomb-sprite"></div>
+      }
+    </div>
+  }
+
+  <!-- Number Only -->
+  @if (state === 'hidden') {
+    <div id="number-only" class="fade-in">
+      <!-- Use displayBox.value here -->
+      {{ data.value }}
+    </div>
+  }
+
+  <!-- Pirate Message -->
+  @if (message) {
+    <div class="pirate-toast">
+      {{ message }}
+    </div>
+  }
 </div>
