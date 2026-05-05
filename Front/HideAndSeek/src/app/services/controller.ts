@@ -12,6 +12,35 @@ export class Controller {
     this.gameData.updateScore(who, delta);
   }
 
+  async startGame(rows: number, columns: number, role: string) {
+    try {
+      // 1. Tell Flask to build the board and do the math
+      const response = await fetch('http://localhost:5000/api/setup-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns, role })
+      });
+
+      const backendData = await response.json();
+
+      // 2. Save the math to GameData for the Tableau
+      this.gameData.setSimplexData(
+        backendData.payoff_matrix,
+        backendData.primal,
+        backendData.dual,
+        backendData.hider_probs,
+        backendData.seeker_probs
+      );
+
+      // 3. Return the actual box grid (where the hider is) to draw the map
+      return backendData.grid_layout; // Array of {value, hider: true/false}
+
+    } catch (error) {
+      console.error("Failed to connect to backend Ahoy!", error);
+      return null;
+    }
+  }
+
   // Changed to async to handle the backend call immediately upon revealing
   async revealBox(row: number, column: number) {
     const matrix = this.gameData.getCurrentMatrix();

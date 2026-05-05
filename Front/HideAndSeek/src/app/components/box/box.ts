@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, ChangeDetectorRef, Output, EventEmitter} from '@angular/core';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -11,6 +11,7 @@ export class Box {
   // 1. Accept the plain data object as an input
   @Input() data!: { value: number, hider: boolean };
 
+  @Output() boxClicked = new EventEmitter<void>();
   revealed: boolean = false;
   state: 'unsmashed' | 'smashing' | 'treasure' | 'bomb' | 'explosion' | 'hidden' = 'unsmashed';
   treasureGifPath = '/assets/treasure-chest.gif';
@@ -23,6 +24,7 @@ export class Box {
   reveal() {
     if (this.state !== 'unsmashed') return;
 
+    this.boxClicked.emit();
     this.revealed = true;
     this.state = 'smashing';
     this.cdr.detectChanges();

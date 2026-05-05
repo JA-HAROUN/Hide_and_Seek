@@ -5,6 +5,7 @@ import { GameData } from '../../services/game-data';
 import { MapSize } from '../../models/map-size';
 import { Subscription } from 'rxjs';
 import { BoxData } from '../../models/box-data';
+import {Controller} from '../../services/controller';
 
 @Component({
   selector: 'app-matrix-generator',
@@ -18,25 +19,26 @@ export class MatrixGenerator implements OnDestroy {
   matrix: BoxData[][] = [];
   private sub: Subscription | null = null;
 
-  constructor(private gameData: GameData) {
+  constructor(private gameData: GameData, private controller: Controller) {
     this.matrix = [];
 
-    let isDemo = false;
-    try {
-      const params = new URLSearchParams(window.location.search);
-      isDemo = params.get('demo') === 'true';
-    } catch (e) {}
-
-    this.sub = this.gameData.getSize().subscribe((s: MapSize) => {
+    this.sub = this.gameData.getSize().subscribe(async (s: MapSize) => {
       if (s.rows > 0 && s.columns > 0) {
+
+        // 1. Generate an empty safe grid first (so the UI doesn't crash)
         this.generateMatrix(s.rows, s.columns);
-        // if (isDemo) {
-          this.setMatrixValues(generateMockMatrix(s.rows, s.columns));
-       //}
+
+        // 2. Ask the backend for the REAL data
+        const role = this.gameData.getCurrentRole() || 'seeker';
+        const realGrid = await this.controller.startGame(s.rows, s.columns, role);
+
+        // 3. Update the UI boxes with the real hider locations!
+        if (realGrid) {
+          this.setMatrixValues(realGrid);
+        }
       }
     });
   }
-
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
   }
@@ -62,5 +64,10 @@ export class MatrixGenerator implements OnDestroy {
         this.matrix[i][j].hider = values[i][j].hider;
       }
     }
+  }
+
+  protected handleBoxClick(rowIndex: number, colIndex: number) {
+    console.log(`Sending move to backend: Row ${rowIndex}, Col ${colIndex}`);
+    this.controller.revealBox(rowIndex, colIndex);
   }
 }

@@ -10,6 +10,11 @@ export class GameData {
   private scores$ = new BehaviorSubject<{ hider: number; seeker: number }>({ hider: 0, seeker: 0 });
   private matrix$ = new BehaviorSubject<GameBox[][]>([]);
 
+  private payoffMatrix = new BehaviorSubject<number[][]>([]);
+  private primalProblem = new BehaviorSubject<any>(null);
+  private dualProblem = new BehaviorSubject<any>(null);
+  private hiderProbs = new BehaviorSubject<number[]>([]);
+  private seekerProbs = new BehaviorSubject<number[]>([]);
   // Size
   setSize(rows: number, columns: number) {
     this.size$.next({ rows: rows || 0, columns: columns || 0 });
@@ -88,4 +93,22 @@ export class GameData {
     }
     this.matrix$.next(matrix);
   }
+
+  setSimplexData(matrix: number[][], primal: any, dual: any, hProbs: number[], sProbs: number[]) {
+    this.payoffMatrix.next(matrix);
+    this.primalProblem.next(primal);
+    this.dualProblem.next(dual);
+    this.hiderProbs.next(hProbs);
+    this.seekerProbs.next(sProbs);
+  }
+
+  getSimplexData() {
+    return {
+      matrix: this.payoffMatrix.asObservable(),
+      primal: this.primalProblem.asObservable(),
+      dual: this.dualProblem.asObservable(),
+      hiderProbs: this.hiderProbs.asObservable(),
+      seekerProbs: this.seekerProbs.asObservable()
+    };
+}
 }
