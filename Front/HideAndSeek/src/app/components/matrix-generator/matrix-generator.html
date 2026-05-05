@@ -1,48 +1,6 @@
+<div class="game-layout">
 
-@if (currentRole === 'third') {
-  <div class="simulation-screen">
-
-    @if (isSimulating) {
-      <div class="loading-state fade-in">
-        <h2>The Quartermaster is calculating 100 voyages...</h2>
-        <div class="spinner">⏳</div>
-      </div>
-    }
-
-    @if (!isSimulating && simulationResults) {
-      <div class="results-board fade-in">
-        <h2>📜 Quartermaster's Log: 100 Rounds Completed</h2>
-
-        <table class="sim-table">
-          <thead>
-          <tr>
-            <th>Crew</th>
-            <th>Rounds Won</th>
-            <th>Total Plunder (Score)</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td><strong>Hider (Computer)</strong></td>
-            <td>{{ simulationResults.hider_wins }}</td>
-            <td>{{ simulationResults.hider_score }}</td>
-          </tr>
-          <tr>
-            <td><strong>Seeker (Computer)</strong></td>
-            <td>{{ simulationResults.seeker_wins }}</td>
-            <td>{{ simulationResults.seeker_score }}</td>
-          </tr>
-          </tbody>
-        </table>
-
-        <!-- Button to play again -->
-        <button class="btn-primary" (click)="generateMatrix(matrix.length, matrix[0].length)">Simulate Another 100</button>
-      </div>
-    }
-  </div>
-}
-@else {
-
+  <!-- 1. The Map (Always Visible!) -->
   <div class="matrix-container">
     @for (row of matrix; track $index; let rowIndex = $index) {
       <div class="matrix-row">
@@ -51,10 +9,44 @@
             [data]="cell"
             [role]="currentRole"
             [isFlipped]="isBoardFlipped"
+            [speedMultiplier]="speedMultiplier"
             (boxClicked)="handleBoxClick(rowIndex, colIndex)">
           </app-box>
         }
       </div>
     }
   </div>
-}
+
+  <!-- 2. Quartermaster Controls (Only shown in 'third' role) -->
+  @if (currentRole === 'third') {
+    <div class="quartermaster-panel panel">
+      <h2>📜 Captain's Log</h2>
+
+      <div class="sim-controls">
+        <button class="btn-primary" [disabled]="isSimulating" (click)="startVisualSimulation()">
+          Start 100 Voyages
+        </button>
+        <button class="btn-secondary" [disabled]="!isSimulating" (click)="stopSimulation()">
+          Halt
+        </button>
+      </div>
+
+      <div class="speed-controls">
+        <span>Speed: </span>
+        <button [class.active]="speedMultiplier === 1" (click)="setSpeed(1)">1x</button>
+        <button [class.active]="speedMultiplier === 2" (click)="setSpeed(2)">2x</button>
+        <button [class.active]="speedMultiplier === 5" (click)="setSpeed(5)">5x</button>
+      </div>
+
+      <div class="sim-scoreboard">
+        <p><strong>Voyage Progress:</strong> {{ simRound }} / 100</p>
+      </div>
+
+      <div class="sim-log">
+        @for (entry of simLog; track $index) {
+          <div class="log-entry fade-in">{{ entry }}</div>
+        }
+      </div>
+    </div>
+  }
+</div>

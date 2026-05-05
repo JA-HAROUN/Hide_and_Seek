@@ -12,63 +12,6 @@ export class Controller {
     this.gameData.updateScore(who, delta);
   }
 
-  async startGame(rows: number, columns: number, role: string) {
-    try {
-      // 1. Tell Flask to build the board and do the math
-      const response = await fetch('http://localhost:5000/api/setup-game', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows, columns, role })
-      });
-
-      const backendData = await response.json();
-
-      // 2. Save the math to GameData for the Tableau
-      this.gameData.setSimplexData(
-        backendData.payoff_matrix,
-        backendData.primal,
-        backendData.dual,
-        backendData.hider_probs,
-        backendData.seeker_probs
-      );
-
-      // 3. Return the actual box grid (where the hider is) to draw the map
-      return backendData.grid_layout; // Array of {value, hider: true/false}
-
-    } catch (error) {
-      console.error("Failed to connect to backend Ahoy!", error);
-      return null;
-    }
-  }
-
-  // Changed to async to handle the backend call immediately upon revealing
-  async revealBox(row: number, column: number) {
-    const matrix = this.gameData.getCurrentMatrix();
-    if (!matrix[row] || !matrix[row][column]) {
-      return null;
-    }
-
-    const nextMatrix = matrix.map((matrixRow) =>
-      matrixRow.map((box) => ({ ...box })),
-    );
-
-    nextMatrix[row][column].revealed = true;
-    this.gameData.setMatrix(nextMatrix);
-
-    // Create the snapshot and append the specific move made
-    const snapshot = this.getSnapshot();
-    const payload = {
-      ...snapshot,
-      clicked_row: row,
-      clicked_col: column
-    };
-
-    // Send the move to Flask and await the updated scores
-    await this.sendDataToBack(payload);
-
-    return nextMatrix[row][column];
-  }
-
   getSnapshot(): GameSnapshot {
     return {
       size: this.gameData.getCurrentSize(),
@@ -78,25 +21,68 @@ export class Controller {
     };
   }
 
-  // Updated to point to the correct URL and handle the incoming JSON response
+  // --- 1. GAME SETUP ---
+  async startGame(rows: number, columns: number, role: string) {
+    try {
+      const response = await fetch('http://localhost:5000/api/setup-game', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns, role })
+      });
+
+      const backendData = await response.json();
+
+      this.gameData.setSimplexData(
+        backendData.payoff_matrix,
+        backendData.primal,
+        backendData.dual,
+        backendData.hider_probs,
+        backendData.seeker_probs
+      );
+
+      return backendData.grid_layout;
+
+    } catch (error) {
+      console.error("Failed to connect to backend Ahoy!", error);
+      return null;
+    }
+  }
+
+  // --- 2. SEEKER MODE FLOW ---
+  async revealBox(row: number, column: number) {
+    const matrix = this.gameData.getCurrentMatrix();
+    if (!matrix[row] || !matrix[row][column]) return null;
+
+    const nextMatrix = matrix.map((matrixRow) =>
+      matrixRow.map((box) => ({ ...box })),
+    );
+
+    nextMatrix[row][column].revealed = true;
+    this.gameData.setMatrix(nextMatrix);
+
+    const snapshot = this.getSnapshot();
+    const payload = {
+      ...snapshot,
+      clicked_row: row,
+      clicked_col: column
+    };
+
+    await this.sendDataToBack(payload);
+    return nextMatrix[row][column];
+  }
+
   async sendDataToBack(payload: any) {
     try {
-
       const response = await fetch('http://localhost:5000/api/game-state', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to send game state: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Failed to send game state: ${response.status}`);
 
       const responseData = await response.json();
 
-      // Update the Angular frontend with the new scores calculated by Flask
       if (responseData.updated_scores) {
         const hiderDelta = responseData.updated_scores.hider - this.gameData.getCurrentScores().hider;
         const seekerDelta = responseData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
@@ -104,30 +90,13 @@ export class Controller {
         if (hiderDelta !== 0) this.updateScore('hider', hiderDelta);
         if (seekerDelta !== 0) this.updateScore('seeker', seekerDelta);
       }
-
       return responseData;
     } catch (error) {
       console.error("Error communicating with backend:", error);
     }
   }
 
-  async runSimulation(rows: number, columns: number) {
-    try {
-      // Tell Flask to instantly simulate 100 rounds
-      const response = await fetch('http://localhost:5000/api/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows, columns, rounds: 100 })
-      });
-
-      const simulationData = await response.json();
-      return simulationData;
-
-    } catch (error) {
-      console.error("Simulation failed!", error);
-      return null;
-    }
-  }
+  // --- 3. HIDER MODE FLOW ---
   async playHiderTurn(hiddenRow: number, hiddenCol: number) {
     const payload = {
       hidden_row: hiddenRow,
@@ -144,12 +113,15 @@ export class Controller {
 
       const data = await response.json();
 
-      // Update scores
+      // FIXED: Actually update the scores in the UI!
       if (data.updated_scores) {
-        // update logic...
+        const hiderDelta = data.updated_scores.hider - this.gameData.getCurrentScores().hider;
+        const seekerDelta = data.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
+
+        if (hiderDelta !== 0) this.updateScore('hider', hiderDelta);
+        if (seekerDelta !== 0) this.updateScore('seeker', seekerDelta);
       }
 
-      // Return the computer's guess coordinates so the UI can animate them
       return {
         row: data.computer_guess_row,
         col: data.computer_guess_col,
@@ -157,6 +129,38 @@ export class Controller {
       };
     } catch (error) {
       console.error("Backend connection failed", error);
+      return null;
+    }
+  }
+
+  // --- 4. QUARTERMASTER / SIMULATION FLOW ---
+
+  // NEW: Needed for the visual Auto-Battler!
+  async playSimulatedRound(rows: number, columns: number) {
+    try {
+      const response = await fetch('http://localhost:5000/api/simulate-round', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Simulation round failed!", error);
+      return null;
+    }
+  }
+
+  // (Optional) Kept just in case you ever want the instant 100-round math again
+  async runSimulation(rows: number, columns: number) {
+    try {
+      const response = await fetch('http://localhost:5000/api/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows, columns, rounds: 100 })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error("Simulation failed!", error);
       return null;
     }
   }

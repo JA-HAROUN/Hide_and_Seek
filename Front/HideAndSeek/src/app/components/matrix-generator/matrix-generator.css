@@ -89,3 +89,74 @@
 .cell.revealed.hider:hover {
   background-color: var(--olive);
 }
+
+/* Add to matrix-generator.css */
+
+.game-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.quartermaster-panel {
+  background: rgba(25, 30, 36, 0.9);
+  border: 2px solid #8b5a2b;
+  border-radius: 8px;
+  padding: 20px;
+  width: 320px;
+  color: #f4e4d7;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.quartermaster-panel h2 {
+  color: #DAA520;
+  margin-top: 0;
+  border-bottom: 1px dashed #8b5a2b;
+  padding-bottom: 10px;
+}
+
+.sim-controls, .speed-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.speed-controls button {
+  background: #3d2817;
+  border: 1px solid #8b5a2b;
+  color: white;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.speed-controls button.active {
+  background: #DAA520;
+  color: black;
+  font-weight: bold;
+}
+
+.sim-scoreboard {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.sim-log {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-entry {
+  font-size: 0.9em;
+  padding: 8px;
+  background: rgba(139, 90, 43, 0.2);
+  border-left: 3px solid #DAA520;
+}
