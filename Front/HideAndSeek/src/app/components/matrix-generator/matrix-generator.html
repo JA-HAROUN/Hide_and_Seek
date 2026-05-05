@@ -1,14 +1,13 @@
-<div id="matrix-generator">
-    <h1>Matrix Generator</h1>
-    <div id="matrix">
-        @for (row of matrix; track $index) {
-            <div class="row">
-                @for (box of row; track $index) {
-                    <div class="cell">
-                        <app-box [box]="box"></app-box>
-                    </div>
-                }
-            </div>
-        }
+<div class="matrix-container">
+
+  @for (row of matrix; track $index) {
+    <div class="matrix-row">
+
+      @for (cell of row; track cell.value) {
+
+        <app-box [data]="cell"></app-box>
+
+      }
     </div>
+  }
 </div>

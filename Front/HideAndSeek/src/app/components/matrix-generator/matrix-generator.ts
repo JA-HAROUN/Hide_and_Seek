@@ -4,6 +4,7 @@ import { generateMockMatrix } from '../box/mock-matrix';
 import { GameData } from '../../services/game-data';
 import { MapSize } from '../../models/map-size';
 import { Subscription } from 'rxjs';
+import { BoxData } from '../../models/box-data';
 
 @Component({
   selector: 'app-matrix-generator',
@@ -13,27 +14,25 @@ import { Subscription } from 'rxjs';
 })
 export class MatrixGenerator implements OnDestroy {
 
-  matrix: Box[][] = [];
+  // 2. Use the data interface instead of the Component class
+  matrix: BoxData[][] = [];
   private sub: Subscription | null = null;
 
   constructor(private gameData: GameData) {
     this.matrix = [];
 
-    // Check if demo mode is enabled
     let isDemo = false;
     try {
       const params = new URLSearchParams(window.location.search);
       isDemo = params.get('demo') === 'true';
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
 
     this.sub = this.gameData.getSize().subscribe((s: MapSize) => {
       if (s.rows > 0 && s.columns > 0) {
         this.generateMatrix(s.rows, s.columns);
-        if (isDemo) {
+        // if (isDemo) {
           this.setMatrixValues(generateMockMatrix(s.rows, s.columns));
-        }
+       //}
       }
     });
   }
@@ -42,24 +41,26 @@ export class MatrixGenerator implements OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  // Method to generate a matrix of Box objects based on the specified number of rows and columns
+  // 3. Generate plain data objects, NOT 'new Box()'
   generateMatrix(rows: number, columns: number) {
     this.matrix = [];
+    let counter = 1;
     for (let i = 0; i < rows; i++) {
       this.matrix[i] = [];
       for (let j = 0; j < columns; j++) {
-        this.matrix[i][j] = new Box();
+
+        this.matrix[i][j] = { value: counter++, hider: false };
       }
     }
   }
 
-  // Method to set the values of the matrix
+  // 4. Update the values in the plain objects
   setMatrixValues(values: { value: number, hider: boolean }[][]) {
     for (let i = 0; i < values.length; i++) {
       for (let j = 0; j < values[i].length; j++) {
-        this.matrix[i][j].setValue(values[i][j].value, values[i][j].hider);
+        this.matrix[i][j].value = values[i][j].value;
+        this.matrix[i][j].hider = values[i][j].hider;
       }
     }
   }
-
 }
