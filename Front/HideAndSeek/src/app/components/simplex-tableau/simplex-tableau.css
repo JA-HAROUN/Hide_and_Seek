@@ -47,3 +47,108 @@
 	width: 35%;
 	color: var(--brown);
 }
+/* Add this to your existing CSS */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* Allows horizontal scrolling for large matrices */
+  margin-top: 15px;
+  border: 2px solid #5a3d2b; /* Pirate wood color */
+  border-radius: 4px;
+}
+
+.matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+.matrix-table th, .matrix-table td {
+  padding: 10px;
+  border: 1px solid #8b5a2b;
+  min-width: 60px;
+}
+
+.matrix-table thead th, .row-header {
+  background-color: #dcb37b; /* Parchment header color */
+  font-weight: bold;
+}
+
+.empty-corner {
+  background-color: #c49a5b !important;
+}
+
+.prob-label {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #333;
+  margin-top: 4px;
+}
+
+/* Optional: Color code the scores to make the matrix easier to read */
+.matrix-table td.negative {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+
+.matrix-table td.positive {
+  color: #5cb85c;
+  font-weight: bold;
+}
+
+/* Linear Programming Formulation Styles */
+.lp-section {
+  margin-top: 20px;
+}
+
+.lp-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.lp-block {
+  flex: 1;
+  min-width: 300px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid #8b5a2b;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.lp-block h3 {
+  margin-top: 0;
+  color: #5a3d2b;
+  border-bottom: 2px dashed #dcb37b;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
+}
+
+.math-equation {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.highlight-objective {
+  color: #8b0000; /* Deep red to make the objective pop */
+  background-color: rgba(220, 179, 123, 0.3);
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.math-constraints {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 1rem;
+  padding-left: 10px;
+  border-left: 3px solid #5a3d2b;
+}
+
+.constraint-line {
+  margin-bottom: 4px;
+  color: #333;
+}
