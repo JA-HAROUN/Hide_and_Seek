@@ -87,7 +87,7 @@
         );
         background-size: 100% 100%;
         border: 2px solid #3d2817;
-        box-shadow: 
+        box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.2),
             inset 0 -2px 0 rgba(0, 0, 0, 0.4),
             0 4px 6px rgba(0, 0, 0, 0.3);
@@ -245,23 +245,37 @@
 
 /* Number Only (after explosion) */
 #number-only {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 1.5em;
-        font-weight: 700;
-        color: var(--navy);
-        animation: fade-in 0.4s ease-out;
+    width: 6.25rem;
+    height: 6.25rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #442200;
 }
 
-@keyframes fade-in {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
+/* Pirate Message Toast */
+.pirate-toast {
+    position: absolute;
+    bottom: -2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffd571;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    animation: fadeUp 0.3s ease-out;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
 }
 
 /* Reveal Animation */

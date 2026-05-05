@@ -1,8 +1,8 @@
 <div id="box-container">
     <!-- Wooden Box (visible in unsmashed and smashing states) -->
     @if (state === 'unsmashed' || state === 'smashing') {
-        <div 
-            id="box" 
+        <div
+            id="box"
             [ngClass]="{
                 'wooden-box': true,
                 'smashing': state === 'smashing'
@@ -25,9 +25,9 @@
     @if (state === 'bomb' || state === 'explosion') {
         <div id="bomb-container" [ngClass]="{ 'exploding': state === 'explosion' }">
             @if (state === 'explosion') {
-                <img 
-                    [src]="bombGifPath" 
-                    alt="Bomb Explosion" 
+                <img
+                    [src]="bombGifPath"
+                    alt="Bomb Explosion"
                     id="bomb-gif"
                     class="explosion-animation" />
             }
@@ -41,6 +41,13 @@
     @if (state === 'hidden') {
         <div id="number-only" class="fade-in">
             {{ value }}
+        </div>
+    }
+
+    <!-- Pirate Message -->
+    @if (message) {
+        <div class="pirate-toast">
+            {{ message }}
         </div>
     }
 </div>

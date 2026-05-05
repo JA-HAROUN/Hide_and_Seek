@@ -1,38 +1,39 @@
 /* ============================================================
-   Global Design System — Hide & Seek
+   Global Design System €” Plunder Quest
    Palette:
-     Navy  #002244  |  Brown  #442200
-     Olive #8a9a5b  |  Sage   #6a9a5b  |  Tan   #9a8b5b
+     Ocean Blue  #0f4c75    Deep Sea   #1b262c
+     Gold        #f9a826    Wood Brown #5c3a21
+     Parchment   #f4e3c5    Dark Wood  #3b2514
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   /* Raw palette */
-  --navy:  #002244;
-  --brown: #442200;
-  --olive: #8a9a5b;
-  --sage:  #6a9a5b;
-  --tan:   #9a8b5b;
+  --navy:  #1b262c;
+  --brown: #5c3a21;
+  --olive: #0f4c75;
+  --sage:  #3282b8;
+  --tan:   #f9a826;
 
-  /* Derived shades (lightened for backgrounds) */
-  --navy-dim:   #001833;   /* darker navy for hover / depth  */
-  --brown-dim:  #2e1700;   /* darker brown for hover          */
-  --olive-muted:#c2cc9e;   /* very light olive for surfaces   */
-  --tan-muted:  #d6ceaa;   /* very light tan for surfaces     */
+  /* Derived shades */
+  --navy-dim:   #121a1f;
+  --brown-dim:  #3b2514;
+  --olive-muted:#bbe1fa;
+  --tan-muted:  #ffd571;
 
   /* Semantic tokens */
-  --bg-page:        var(--navy);       /* full-page background            */
-  --bg-card:        #ffffff;           /* card / form background          */
-  --bg-surface:     #f5f0e8;           /* slightly warm off-white surface */
-  --text-on-dark:   #f0ece0;           /* readable on navy/brown          */
-  --text-on-light:  #1a1a1a;           /* readable on light surfaces      */
-  --text-muted:     #6b6455;           /* subtle labels                   */
-  --border-color:   var(--brown);      /* all borders                     */
-  --focus-ring:     var(--olive);      /* input focus ring                */
+  --bg-page:        var(--navy);
+  --bg-card:        #f4e3c5;           /* parchment look */
+  --bg-surface:     #e2cfa5;
+  --text-on-dark:   #f4e3c5;
+  --text-on-light:  #3b2514;
+  --text-muted:     #5c3a21;
+  --border-color:   var(--brown-dim);
+  --focus-ring:     var(--tan);
 }
 
-/* ── Reset ── */
+/* ”€”€ Reset ”€”€ */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -46,26 +47,37 @@ html, body {
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background-color: var(--bg-page);
+  /* Optional: wood or parchment pattern */
+  background-image: radial-gradient(circle, #1b262c 0%, #0d1215 100%);
   color: var(--text-on-dark);
   font-size: 16px;
   line-height: 1.5;
 }
 
-/* ── Typography ── */
+/* ”€”€ Typography ”€”€ */
 h1, h2, h3 {
+  font-family: 'Inter', sans-serif;
   font-weight: 700;
-  color: var(--text-on-dark);
+  color: var(--tan);
+  text-shadow: 2px 2px 4px #000;
 }
 
-/* ── Buttons — base ── */
+/* Base text on light backgrounds */
+.panel h1, .panel h2, .panel h3, #choose-role h1, #get-map-size h1 {
+  color: var(--brown-dim);
+  text-shadow: 1px 1px 0px #fff;
+}
+
+/* ”€”€ Buttons €” base ”€”€ */
 button {
-  font-family: inherit;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   border: 2px solid transparent;
   border-radius: 4px;
   font-weight: 600;
-  font-size: 1em;
   padding: 0.7em 1.6em;
+  letter-spacing: 1px;
+  font-size: 1.25em;
   transition:
     background-color 0.18s ease,
     border-color     0.18s ease,
@@ -150,14 +162,17 @@ select:focus {
 }
 
 /* ── Shared card / panel ── */
-.panel {
-  background-color: #fff;
-  border: 2px solid var(--border-color);
-  border-radius: 6px;
+.panel, #choose-role, #get-map-size {
+  background-color: var(--bg-card);
+  background-image: radial-gradient(circle, #f4e3c5 0%, #e8ba7d 100%);
+  border: 4px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.7);
   padding: 2em;
+  color: var(--text-on-light);
 }
 
-/* ── Layout utilities (shared) ── */
+/* ”€”€ Layout utilities (shared) ”€”€ */
 .scores-row {
   display: flex;
   gap: 1rem;
@@ -168,14 +183,30 @@ select:focus {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: var(--navy);
-  border: 0.12rem solid var(--tan);
-  border-radius: 0.4rem;
-  padding: 0.35rem 0.9rem;
-  min-width: 6.875rem;
+  background-color: var(--brown);
+  border: 4px solid var(--tan);
+  border-radius: 8px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.5);
+  padding: 0.5rem 1rem;
+  min-width: 8rem;
+}
+
+.score-panel .score-label h2 {
+  font-size: 1.2rem;
+  margin: 0;
+  color: var(--tan);
+  text-shadow: 1px 1px 2px #000;
+}
+
+.score-panel .score-value p {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-small {
-  font-size: 0.875rem;
+  font-size: 1rem;
   padding: 0.45rem 0.9rem;
 }
