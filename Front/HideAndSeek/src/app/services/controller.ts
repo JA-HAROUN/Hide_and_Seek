@@ -164,4 +164,20 @@ export class Controller {
       return null;
     }
   }
+
+  async nextRound(role: string) {
+    try {
+      const response = await fetch('http://localhost:5000/api/next-round', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role })
+      });
+
+      const data = await response.json();
+      return data.grid_layout; // Returns the new map with the new hiding spot
+    } catch (error) {
+      console.error("Failed to fetch next round", error);
+      return null;
+    }
+  }
 }

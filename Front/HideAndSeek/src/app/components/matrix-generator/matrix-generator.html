@@ -1,23 +1,38 @@
 <div class="game-layout">
 
-  <!-- 1. The Map (Always Visible!) -->
-  <div class="matrix-container">
-    @for (row of matrix; track $index; let rowIndex = $index) {
-      <div class="matrix-row">
-        @for (cell of row; track cell.value; let colIndex = $index) {
-          <app-box
-            [data]="cell"
-            [role]="currentRole"
-            [isFlipped]="isBoardFlipped"
-            [speedMultiplier]="speedMultiplier"
-            (boxClicked)="handleBoxClick(rowIndex, colIndex)">
-          </app-box>
-        }
+  <!-- LEFT SIDE: The Map and the Next Round Button -->
+  <div class="board-column">
+
+    <!-- 1. The Map -->
+    <div class="matrix-container">
+      @for (row of matrix; track $index; let rowIndex = $index) {
+        <div class="matrix-row">
+          @for (cell of row; track cell.value; let colIndex = $index) {
+            <app-box
+              [data]="cell"
+              [role]="currentRole"
+              [isFlipped]="isBoardFlipped"
+              [isLocked]="isWaitingForSequence || roundOver"
+              [speedMultiplier]="speedMultiplier"
+              (boxClicked)="handleBoxClick(rowIndex, colIndex)">
+            </app-box>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- 2. Next Round Button (Now safely tucked under the map!) -->
+    @if (roundOver) {
+      <div class="next-round-container fade-in">
+        <button class="btn-primary action-btn" (click)="startNextRound()">
+          Play Next Round 🏴‍☠️
+        </button>
       </div>
     }
+
   </div>
 
-  <!-- 2. Quartermaster Controls (Only shown in 'third' role) -->
+  <!-- RIGHT SIDE: Quartermaster Controls -->
   @if (currentRole === 'third') {
     <div class="quartermaster-panel panel">
       <h2>📜 Captain's Log</h2>
@@ -49,4 +64,5 @@
       </div>
     </div>
   }
+
 </div>

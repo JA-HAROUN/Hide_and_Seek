@@ -11,7 +11,7 @@ export class Box {
   @Input() data!: { value: number, hider: boolean };
   @Input() role: string = 'seeker';
   @Input() isFlipped: boolean = false;
-
+  @Input() isLocked: boolean = false;
   // NEW: The speed multiplier to make animations faster in the simulation!
   @Input() speedMultiplier: number = 1;
 
@@ -26,7 +26,7 @@ export class Box {
   constructor(private cdr: ChangeDetectorRef) {}
 
   userClick() {
-    if (this.state !== 'unsmashed') return;
+    if (this.state !== 'unsmashed' || this.isLocked) return;
     this.boxClicked.emit();
 
     if (this.role === 'seeker') {
@@ -52,6 +52,13 @@ export class Box {
       this.message = null;
       this.cdr.detectChanges();
     }, 1000 / this.speedMultiplier);
+  }
+
+  resetBox() {
+    this.state = 'unsmashed';
+    this.revealed = false;
+    this.message = null;
+    this.cdr.detectChanges();
   }
 
   private animateSmash(isTreasure: boolean, isComputerMove: boolean = false) {

@@ -13,7 +13,6 @@ import { Controller } from '../../services/controller';
   styleUrl: './matrix-generator.css',
 })
 export class MatrixGenerator implements OnDestroy {
-
   matrix: BoxData[][] = [];
   currentRole: string = 'seeker';
   private sub: Subscription | null = null;
@@ -28,12 +27,16 @@ export class MatrixGenerator implements OnDestroy {
   simRound: number = 0;
   simLog: string[] = [];
 
+  roundOver: boolean = false;
   // MISSING DELAY HELPER ADDED HERE:
-  private delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+  private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   @ViewChildren(Box) boxComponents!: QueryList<Box>;
 
-  constructor(private gameData: GameData, private controller: Controller) {
+  constructor(
+    private gameData: GameData,
+    private controller: Controller,
+  ) {
     this.matrix = [];
 
     this.sub = this.gameData.getSize().subscribe(async (s: MapSize) => {
@@ -43,19 +46,32 @@ export class MatrixGenerator implements OnDestroy {
 
         // Set up the board based on the role
         if (this.currentRole === 'hider') {
-          setTimeout(() => this.isBoardFlipped = true, 500);
+          setTimeout(() => (this.isBoardFlipped = true), 500);
         }
 
-        if (this.currentRole !== 'third') {
-          const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
-          if (realGrid) {
-            this.setMatrixValues(realGrid);
-          }
+        const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
+        if (realGrid) {
+          this.setMatrixValues(realGrid);
         }
       }
     });
   }
 
+  async startNextRound() {
+    this.roundOver = false;
+    this.isWaitingForSequence = false;
+
+    this.boxComponents.forEach(box => box.resetBox());
+
+    if (this.currentRole === 'hider') {
+      setTimeout(() => { this.isBoardFlipped = true; }, 100);
+    }
+
+    const newGrid = await this.controller.nextRound(this.currentRole);
+    if (newGrid) {
+      this.setMatrixValues(newGrid);
+    }
+  }
   // MISSING SPEED/STOP METHODS ADDED HERE:
   setSpeed(speed: number) {
     this.speedMultiplier = speed;
@@ -65,28 +81,30 @@ export class MatrixGenerator implements OnDestroy {
     this.isSimulating = false;
   }
 
-
   private getBoxComponent(row: number, col: number) {
     const columns = this.matrix[0].length;
-    const index = (row * columns) + col;
+    const index = row * columns + col;
     return this.boxComponents.toArray()[index];
   }
 
   async handleBoxClick(row: number, col: number) {
-    if (this.isWaitingForSequence) return;
+    if (this.isWaitingForSequence || this.roundOver) return;
 
     if (this.currentRole === 'seeker') {
-      this.controller.revealBox(row, col);
+      this.isWaitingForSequence = true; // Lock the board
+      await this.controller.revealBox(row, col);
+
+      // Wait 3 seconds for smash/bomb animation to finish, then show Next Round button
+      setTimeout(() => {
+        this.roundOver = true;
+      }, 3000);
     }
     else if (this.currentRole === 'hider') {
       if (!this.isBoardFlipped) return;
 
       this.isWaitingForSequence = true;
-      console.log(`User hiding treasure at Row ${row}, Col ${col}`);
-
       const boxIndex = (row * this.matrix[0].length) + col;
-      const targetBox = this.boxComponents.toArray()[boxIndex];
-      targetBox.showBuryAnimation();
+      this.boxComponents.toArray()[boxIndex].showBuryAnimation();
 
       setTimeout(async () => {
         this.isBoardFlipped = false;
@@ -97,7 +115,12 @@ export class MatrixGenerator implements OnDestroy {
           if (computerGuess) {
             this.animateComputerMove(computerGuess.row, computerGuess.col, computerGuess.found);
           }
-          this.isWaitingForSequence = false;
+
+          // Wait 3 seconds for computer's smash animation to finish, then show Next Round button
+          setTimeout(() => {
+            this.roundOver = true;
+          }, 3000);
+
         }, 800);
       }, 1200);
     }
@@ -122,7 +145,7 @@ export class MatrixGenerator implements OnDestroy {
       if (!this.isSimulating) break;
 
       this.simRound = i;
-      this.generateMatrix(rows, cols); // Reset the board visually
+      this.boxComponents.forEach((box) => box.resetBox());
 
       // 1. Get the moves from Flask
       const roundData = await this.controller.playSimulatedRound(rows, cols);
@@ -140,11 +163,15 @@ export class MatrixGenerator implements OnDestroy {
 
       // 4. Update the Log and GLOBAL SCORES
       if (roundData.found_treasure) {
-        this.simLog.unshift(`Round ${i}: Seeker caught the Hider at (${roundData.seeker_row}, ${roundData.seeker_col})!`);
+        this.simLog.unshift(
+          `Round ${i}: Seeker caught the Hider at (${roundData.seeker_row}, ${roundData.seeker_col})!`,
+        );
         this.controller.updateScore('seeker', 1);
         this.controller.updateScore('hider', -1);
       } else {
-        this.simLog.unshift(`Round ${i}: Hider survived! Bomb hit at (${roundData.seeker_row}, ${roundData.seeker_col}).`);
+        this.simLog.unshift(
+          `Round ${i}: Hider survived! Bomb hit at (${roundData.seeker_row}, ${roundData.seeker_col}).`,
+        );
         this.controller.updateScore('seeker', -1);
         this.controller.updateScore('hider', 1);
       }
@@ -174,7 +201,7 @@ export class MatrixGenerator implements OnDestroy {
     }
   }
 
-  setMatrixValues(values: { value: number, hider: boolean }[][]) {
+  setMatrixValues(values: { value: number; hider: boolean }[][]) {
     for (let i = 0; i < values.length; i++) {
       for (let j = 0; j < values[i].length; j++) {
         this.matrix[i][j].value = values[i][j].value;
