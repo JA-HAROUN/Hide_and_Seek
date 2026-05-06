@@ -15,6 +15,7 @@ export class GameData {
   private dualProblem = new BehaviorSubject<any>(null);
   private hiderProbs = new BehaviorSubject<number[]>([]);
   private seekerProbs = new BehaviorSubject<number[]>([]);
+  private useProximity: boolean = true;
   // Size
   setSize(rows: number, columns: number) {
     this.size$.next({ rows: rows || 0, columns: columns || 0 });
@@ -108,7 +109,14 @@ export class GameData {
       primal: this.primalProblem.asObservable(),
       dual: this.dualProblem.asObservable(),
       hiderProbs: this.hiderProbs.asObservable(),
-      seekerProbs: this.seekerProbs.asObservable()
+      seekerProbs: this.seekerProbs.asObservable(),
     };
-}
+  }
+  setUseProximity(val: boolean) {
+    this.useProximity = val;
+  }
+
+  getUseProximity(): boolean {
+    return this.useProximity;
+  }
 }

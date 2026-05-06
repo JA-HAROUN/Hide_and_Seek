@@ -19,10 +19,12 @@ def setup_game():
         role = data.get('role', 'seeker')
 
         print(f"\n🎮 Starting new game: {rows}x{columns}, Player role: {role}")
-        current_game = Game(rows, columns)
+        use_proximity = data.get('use_proximity', True)
+        current_game = Game(rows, columns, use_proximity)
 
         hider_row = random.randint(0, rows - 1)
         hider_col = random.randint(0, columns - 1)
+
         current_game.set_hider_position(hider_row, hider_col)
 
         grid_layout = []

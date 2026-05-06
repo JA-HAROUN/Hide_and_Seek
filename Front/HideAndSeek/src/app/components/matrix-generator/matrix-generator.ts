@@ -48,8 +48,9 @@ export class MatrixGenerator implements OnDestroy {
         if (this.currentRole === 'hider') {
           setTimeout(() => (this.isBoardFlipped = true), 500);
         }
+        const useProx = this.gameData.getUseProximity();
 
-        const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole);
+        const realGrid = await this.controller.startGame(s.rows, s.columns, this.currentRole, useProx);
         if (realGrid) {
           this.setMatrixValues(realGrid);
         }
@@ -166,14 +167,19 @@ export class MatrixGenerator implements OnDestroy {
         this.simLog.unshift(
           `Round ${i}: Seeker caught the Hider at (${roundData.seeker_row}, ${roundData.seeker_col})!`,
         );
-        this.controller.updateScore('seeker', 1);
-        this.controller.updateScore('hider', -1);
       } else {
         this.simLog.unshift(
           `Round ${i}: Hider survived! Bomb hit at (${roundData.seeker_row}, ${roundData.seeker_col}).`,
         );
-        this.controller.updateScore('seeker', -1);
-        this.controller.updateScore('hider', 1);
+      }
+
+      // Calculate the exact decimal score delta from the Python backend!
+      if (roundData.updated_scores) {
+        const hiderDelta = roundData.updated_scores.hider - this.gameData.getCurrentScores().hider;
+        const seekerDelta = roundData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
+
+        if (hiderDelta !== 0) this.controller.updateScore('hider', hiderDelta);
+        if (seekerDelta !== 0) this.controller.updateScore('seeker', seekerDelta);
       }
 
       // Keep log short so it doesn't overflow

@@ -22,15 +22,18 @@ export class Controller {
   }
 
   // --- 1. GAME SETUP ---
-  async startGame(rows: number, columns: number, role: string) {
+  async startGame(rows: number, columns: number, role: string, useProximity:boolean) {
+    console.log(`🚀 [API POST] /setup-game | Payload:`, { rows, columns, role, use_proximity: useProximity });
+
     try {
       const response = await fetch('http://localhost:5000/api/setup-game', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows, columns, role })
+        body: JSON.stringify({ rows, columns, role, use_proximity: useProximity })
       });
 
       const backendData = await response.json();
+      console.log(`📥 [API RESPONSE] /setup-game | Data:`, backendData);
 
       this.gameData.setSimplexData(
         backendData.payoff_matrix,
@@ -43,7 +46,7 @@ export class Controller {
       return backendData.grid_layout;
 
     } catch (error) {
-      console.error("Failed to connect to backend Ahoy!", error);
+      console.error("❌ Failed to connect to backend Ahoy!", error);
       return null;
     }
   }
@@ -67,6 +70,7 @@ export class Controller {
       clicked_col: column
     };
 
+    console.log(`🚀 [API POST] /game-state (Seeker Move) | Payload:`, { clicked_row: row, clicked_col: column });
     await this.sendDataToBack(payload);
     return nextMatrix[row][column];
   }
@@ -82,6 +86,7 @@ export class Controller {
       if (!response.ok) throw new Error(`Failed to send game state: ${response.status}`);
 
       const responseData = await response.json();
+      console.log(`📥 [API RESPONSE] /game-state | Data:`, responseData);
 
       if (responseData.updated_scores) {
         const hiderDelta = responseData.updated_scores.hider - this.gameData.getCurrentScores().hider;
@@ -92,7 +97,7 @@ export class Controller {
       }
       return responseData;
     } catch (error) {
-      console.error("Error communicating with backend:", error);
+      console.error("❌ Error communicating with backend:", error);
     }
   }
 
@@ -104,6 +109,8 @@ export class Controller {
       ...this.getSnapshot()
     };
 
+    console.log(`🚀 [API POST] /computer-guess (Hider Mode) | Payload:`, { hidden_row: hiddenRow, hidden_col: hiddenCol });
+
     try {
       const response = await fetch('http://localhost:5000/api/computer-guess', {
         method: 'POST',
@@ -112,8 +119,8 @@ export class Controller {
       });
 
       const data = await response.json();
+      console.log(`📥 [API RESPONSE] /computer-guess | Data:`, data);
 
-      // FIXED: Actually update the scores in the UI!
       if (data.updated_scores) {
         const hiderDelta = data.updated_scores.hider - this.gameData.getCurrentScores().hider;
         const seekerDelta = data.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
@@ -128,29 +135,30 @@ export class Controller {
         found: data.found_treasure
       };
     } catch (error) {
-      console.error("Backend connection failed", error);
+      console.error("❌ Backend connection failed", error);
       return null;
     }
   }
 
   // --- 4. QUARTERMASTER / SIMULATION FLOW ---
-
-  // NEW: Needed for the visual Auto-Battler!
   async playSimulatedRound(rows: number, columns: number) {
+    console.log(`🚀 [API POST] /simulate-round | Requesting 1 auto-battle round...`);
     try {
       const response = await fetch('http://localhost:5000/api/simulate-round', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rows, columns })
       });
-      return await response.json();
+
+      const data = await response.json();
+      console.log(`📥 [API RESPONSE] /simulate-round | Data:`, data);
+      return data;
     } catch (error) {
-      console.error("Simulation round failed!", error);
+      console.error("❌ Simulation round failed!", error);
       return null;
     }
   }
 
-  // (Optional) Kept just in case you ever want the instant 100-round math again
   async runSimulation(rows: number, columns: number) {
     try {
       const response = await fetch('http://localhost:5000/api/simulate', {
@@ -160,12 +168,13 @@ export class Controller {
       });
       return await response.json();
     } catch (error) {
-      console.error("Simulation failed!", error);
+      console.error("❌ Simulation failed!", error);
       return null;
     }
   }
 
   async nextRound(role: string) {
+    console.log(`🚀 [API POST] /next-round | Role:`, role);
     try {
       const response = await fetch('http://localhost:5000/api/next-round', {
         method: 'POST',
@@ -174,9 +183,10 @@ export class Controller {
       });
 
       const data = await response.json();
-      return data.grid_layout; // Returns the new map with the new hiding spot
+      console.log(`📥 [API RESPONSE] /next-round | Data:`, data);
+      return data.grid_layout;
     } catch (error) {
-      console.error("Failed to fetch next round", error);
+      console.error("❌ Failed to fetch next round", error);
       return null;
     }
   }

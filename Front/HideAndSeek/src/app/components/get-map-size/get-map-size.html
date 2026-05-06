@@ -1,18 +1,23 @@
 <div id="get-map-size">
-    <h1>⚓ Map Setup ⚓</h1>
-    <p class="subtitle">Draft your treasure map</p>
-    <div id="map-size-form">
-        <div class="field-group">
-            <label for="rows">Rows (Latitude)</label>
-            <input type="number" id="rows" [value]="rows" (input)="rows = $any($event.target).valueAsNumber" min="1" max="50">
-        </div>
-        <div class="field-group">
-            <label for="columns">Columns (Longitude)</label>
-            <input type="number" id="columns" [value]="columns" (input)="columns = $any($event.target).valueAsNumber" min="1" max="50">
-        </div>
-        <div id="buttons">
-            <button id="change-role" (click)="changeRole()">Change Crew</button>
-            <button id="generate-map" (click)="generateMatrix()">Set Sail!</button>
-        </div>
+  <h1>⚓ Map Setup ⚓</h1>
+  <p class="subtitle">Draft your treasure map</p>
+  <div id="map-size-form">
+    <div class="field-group">
+      <label for="rows">Rows (Latitude)</label>
+      <input type="number" id="rows" [value]="rows" (input)="rows = $any($event.target).valueAsNumber" min="1" max="50">
     </div>
+    <div class="field-group">
+      <label for="columns">Columns (Longitude)</label>
+      <input type="number" id="columns" [value]="columns" (input)="columns = $any($event.target).valueAsNumber" min="1"
+             max="50">
+    </div>
+    <div class="checkbox-container">
+      <input type="checkbox" id="proximity-checkbox" [(ngModel)]="useProximity">
+      <label for="proximity-checkbox">Enable Proximity Penalties</label>
+    </div>
+    <div id="buttons">
+      <button id="change-role" (click)="changeRole()">Change Crew</button>
+      <button id="generate-map" (click)="generateMatrix()">Set Sail!</button>
+    </div>
+  </div>
 </div>

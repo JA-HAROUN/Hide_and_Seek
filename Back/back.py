@@ -9,7 +9,7 @@ class Player(Enum):
     THIRD = 3
 
 class Game:
-    def __init__(self, rows, cols):
+    def __init__(self, rows, cols, use_proximity=True):
         self.rows = rows
         self.cols = cols
         self.matrix = None
@@ -17,7 +17,7 @@ class Game:
         self.probabilities = None # Hider's optimal strategy
         self.value = 0
         self.hider_position = None
-
+        self.use_proximity = use_proximity
         self.hider_score = 0
         self.seeker_score = 0
 
@@ -37,27 +37,46 @@ class Game:
         m_flat = self.matrix.flatten()
         num_cells = self.rows * self.cols
 
-        pay_matrix=[]
+        pay_matrix = []
         for x in range(num_cells):  # Seeker chooses a cell
             for y in range(num_cells):  # Hider chooses a cell
-                if y == x:
-                    if m_flat[x] == 3:
-                        pay_matrix.append(-3)
-                    else:
-                        pay_matrix.append(-1)
-                else:
-                    if m_flat[y] == 3:
-                        pay_matrix.append(1)
-                    elif m_flat[y] == 2:
-                        pay_matrix.append(2)
-                    else:
-                        pay_matrix.append(1)
 
+                # Convert 1D index to 2D row/col coordinates
+                seeker_row, seeker_col = divmod(x, self.cols)
+                hider_row, hider_col = divmod(y, self.cols)
+
+                # Calculate the exact distance between the Seeker's guess and Hider's spot
+                distance = abs(seeker_row - hider_row) + abs(seeker_col - hider_col)
+
+                # Base score is based on the Seeker's chosen cell
+                base_score = float(m_flat[x])
+
+                if distance == 0:
+                    # Direct Hit: Hider loses points
+                    payoff = -base_score
+                else:
+                    # Miss: Hider gains points! (Apply proximity rules if enabled)
+                    if self.use_proximity:
+                        if distance == 1:
+                            payoff = base_score * 0.5
+                        elif distance == 2:
+                            payoff = base_score * 0.75
+                        else:
+                            payoff = base_score * 1.0
+                    else:
+                        # If proximity is off, any miss is a full win for the Hider
+                        payoff = base_score * 1.0
+
+                pay_matrix.append(payoff)
+
+        # Reshape into a 2D matrix for the Simplex solver
         self.pay_matrix = np.array(pay_matrix).reshape(num_cells, num_cells)
 
         A = self.pay_matrix
         m_rows, n_cols = A.shape
-        c = [-1] + [0]*m_rows
+
+        # c represents the objective function (Minimize V)
+        c = [-1] + [0] * m_rows
 
         A_ub = []
         b_ub = []
@@ -66,13 +85,14 @@ class Game:
             A_ub.append(constraint)
             b_ub.append(0)
 
-        A_eq = [[0] + [1]*m_rows]
+        A_eq = [[0] + [1] * m_rows]
         b_eq = [1]
-        bounds = [(None, None)] + [(0, 1)]*m_rows
+        bounds = [(None, None)] + [(0, 1)] * m_rows
 
+        # Solve the Linear Programming Problem!
         res = linprog(c, A_ub, b_ub, A_eq, b_eq, bounds=bounds)
 
-        # Save the probabilities so the computer can use them to guess!
+        # Save the probabilities so the computer can use them to guess
         if res.success:
             self.value = res.x[0]
             self.probabilities = res.x[1:]
@@ -98,7 +118,6 @@ class Game:
         return int(choice // self.cols), int(choice % self.cols)
 
     def generate_place_and_compute(self, seeker_row, seeker_col):
-        """Calculates proximity rules and updates the scores"""
         h_row, h_col = self.hider_position
         distance = abs(seeker_row - h_row) + abs(seeker_col - h_col)
 
@@ -106,24 +125,23 @@ class Game:
         found = False
 
         if distance == 0:
-            # Seeker found the hider!
+            # Direct Hit
             found = True
             score_delta = base_score * 1
             self.seeker_score += score_delta
             self.hider_score -= score_delta
-        elif distance == 1:
-            # Hider safe, but very close (penalty applied)
-            score_delta = base_score * 0.5
-            self.hider_score += score_delta
-            self.seeker_score -= score_delta
-        elif distance == 2:
-            # Hider safe, somewhat close (penalty applied)
-            score_delta = base_score * 0.75
-            self.hider_score += score_delta
-            self.seeker_score -= score_delta
         else:
-            # Hider perfectly safe (full score)
-            score_delta = base_score * 1
+            # Missed!
+            if self.use_proximity:
+                if distance == 1:
+                    score_delta = base_score * 0.5
+                elif distance == 2:
+                    score_delta = base_score * 0.75
+                else:
+                    score_delta = base_score * 1
+            else:
+                score_delta = base_score * 1
+
             self.hider_score += score_delta
             self.seeker_score -= score_delta
 
