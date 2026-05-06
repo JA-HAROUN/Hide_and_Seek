@@ -65,7 +65,7 @@ export class MatrixGenerator implements OnDestroy {
     this.isSimulating = false;
   }
 
-  // MISSING HELPER METHOD ADDED HERE:
+
   private getBoxComponent(row: number, col: number) {
     const columns = this.matrix[0].length;
     const index = (row * columns) + col;
