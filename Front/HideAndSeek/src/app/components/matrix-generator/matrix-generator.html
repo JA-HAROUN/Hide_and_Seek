@@ -7,7 +7,7 @@
     <div class="matrix-container">
       @for (row of matrix; track $index; let rowIndex = $index) {
         <div class="matrix-row">
-          @for (cell of row; track cell.value; let colIndex = $index) {
+          @for (cell of row; track $index; let colIndex = $index) {
             <app-box
               [data]="cell"
               [role]="currentRole"

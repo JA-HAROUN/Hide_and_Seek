@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { MatrixGenerator } from "../matrix-generator/matrix-generator";
 import { Router } from '@angular/router';
 import { GameData } from '../../services/game-data';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-game-page',
-  imports: [MatrixGenerator],
+  imports: [MatrixGenerator, DecimalPipe],
   templateUrl: './game-page.html',
   styleUrl: './game-page.css',
 })
@@ -15,16 +16,24 @@ export class GamePage {
   gameRows: number = 0;
   gameColumns: number = 0;
   currentRole: string | null = null;
-
-  constructor(private gameData: GameData, private router: Router) {
+  hiderWins = 0;
+  seekerWins = 0;
+  constructor(
+    private gameData: GameData,
+    private router: Router,
+  ) {
     this.hiderScore = 0;
     this.seekerScore = 0;
     this.gameRows = this.gameData.getCurrentSize().rows;
     this.gameColumns = this.gameData.getCurrentSize().columns;
     this.currentRole = this.gameData.getCurrentRole();
-    this.gameData.getScores().subscribe(s => {
+    this.gameData.getScores().subscribe((s) => {
       this.hiderScore = s.hider;
       this.seekerScore = s.seeker;
+    });
+    this.gameData.getWins().subscribe((wins) => {
+      this.hiderWins = wins.hider;
+      this.seekerWins = wins.seeker;
     });
   }
 
@@ -43,6 +52,5 @@ export class GamePage {
     this.gameData.clear();
     this.router.navigate(['/choose-role']);
   }
-
 }
 

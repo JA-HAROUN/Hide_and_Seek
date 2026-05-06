@@ -1,4 +1,4 @@
-import { Component, OnDestroy, QueryList, ViewChildren } from '@angular/core';
+import { Component, OnDestroy, QueryList, ViewChildren, NgZone } from '@angular/core';
 import { Box } from '../box/box';
 import { GameData } from '../../services/game-data';
 import { MapSize } from '../../models/map-size';
@@ -21,14 +21,13 @@ export class MatrixGenerator implements OnDestroy {
   isBoardFlipped: boolean = false;
   isWaitingForSequence: boolean = false;
 
-  // MISSING VARIABLES ADDED HERE:
   isSimulating: boolean = false;
   speedMultiplier: number = 1;
   simRound: number = 0;
   simLog: string[] = [];
 
   roundOver: boolean = false;
-  // MISSING DELAY HELPER ADDED HERE:
+
   private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   @ViewChildren(Box) boxComponents!: QueryList<Box>;
@@ -36,6 +35,7 @@ export class MatrixGenerator implements OnDestroy {
   constructor(
     private gameData: GameData,
     private controller: Controller,
+    private zone: NgZone // <--- The ultimate fix to wake up the whole app!
   ) {
     this.matrix = [];
 
@@ -44,7 +44,6 @@ export class MatrixGenerator implements OnDestroy {
         this.generateMatrix(s.rows, s.columns);
         this.currentRole = this.gameData.getCurrentRole() || 'seeker';
 
-        // Set up the board based on the role
         if (this.currentRole === 'hider') {
           setTimeout(() => (this.isBoardFlipped = true), 500);
         }
@@ -73,7 +72,7 @@ export class MatrixGenerator implements OnDestroy {
       this.setMatrixValues(newGrid);
     }
   }
-  // MISSING SPEED/STOP METHODS ADDED HERE:
+
   setSpeed(speed: number) {
     this.speedMultiplier = speed;
   }
@@ -92,13 +91,49 @@ export class MatrixGenerator implements OnDestroy {
     if (this.isWaitingForSequence || this.roundOver) return;
 
     if (this.currentRole === 'seeker') {
-      this.isWaitingForSequence = true; // Lock the board
+      this.isWaitingForSequence = true;
       await this.controller.revealBox(row, col);
 
-      // Wait 3 seconds for smash/bomb animation to finish, then show Next Round button
-      setTimeout(() => {
-        this.roundOver = true;
-      }, 3000);
+      const isHit = this.matrix[row][col].hider;
+
+      if (isHit) {
+        // Direct Hit!
+        setTimeout(() => {
+          this.zone.run(() => { // <--- Forces Angular to update scores AND buttons!
+            this.roundOver = true;
+          });
+        }, 2500);
+      } else {
+        // Missed!
+        setTimeout(() => {
+          let treasureRow = -1;
+          let treasureCol = -1;
+
+          for (let r = 0; r < this.matrix.length; r++) {
+            for (let c = 0; c < this.matrix[r].length; c++) {
+              if (this.matrix[r][c].hider) {
+                treasureRow = r;
+                treasureCol = c;
+                break;
+              }
+            }
+          }
+
+          if (treasureRow !== -1 && treasureCol !== -1) {
+            const treasureBox = this.getBoxComponent(treasureRow, treasureCol);
+            if (treasureBox) {
+              treasureBox.animateComputerGuess(true);
+            }
+          }
+
+          setTimeout(() => {
+            this.zone.run(() => { // <--- Forces Angular to update scores AND buttons!
+              this.roundOver = true;
+            });
+          }, 2500);
+
+        }, 1500);
+      }
     }
     else if (this.currentRole === 'hider') {
       if (!this.isBoardFlipped) return;
@@ -108,7 +143,9 @@ export class MatrixGenerator implements OnDestroy {
       this.boxComponents.toArray()[boxIndex].showBuryAnimation();
 
       setTimeout(async () => {
-        this.isBoardFlipped = false;
+        this.zone.run(() => {
+          this.isBoardFlipped = false;
+        });
 
         setTimeout(async () => {
           const computerGuess = await this.controller.playHiderTurn(row, col);
@@ -117,9 +154,10 @@ export class MatrixGenerator implements OnDestroy {
             this.animateComputerMove(computerGuess.row, computerGuess.col, computerGuess.found);
           }
 
-          // Wait 3 seconds for computer's smash animation to finish, then show Next Round button
           setTimeout(() => {
-            this.roundOver = true;
+            this.zone.run(() => { // <--- Previously missing! Forces the app update.
+              this.roundOver = true;
+            });
           }, 3000);
 
         }, 800);
@@ -148,41 +186,43 @@ export class MatrixGenerator implements OnDestroy {
       this.simRound = i;
       this.boxComponents.forEach((box) => box.resetBox());
 
-      // 1. Get the moves from Flask
       const roundData = await this.controller.playSimulatedRound(rows, cols);
       if (!roundData) break;
 
-      // 2. Animate Hider burying the treasure
       const hiderBox = this.getBoxComponent(roundData.hider_row, roundData.hider_col);
       if (hiderBox) hiderBox.showBuryAnimation();
 
       await this.delay(1200 / this.speedMultiplier);
 
-      // 3. Animate Seeker smashing the box
       const seekerBox = this.getBoxComponent(roundData.seeker_row, roundData.seeker_col);
       if (seekerBox) seekerBox.animateComputerGuess(roundData.found_treasure);
 
-      // 4. Update the Log and GLOBAL SCORES
       if (roundData.found_treasure) {
         this.simLog.unshift(
           `Round ${i}: Seeker caught the Hider at (${roundData.seeker_row}, ${roundData.seeker_col})!`,
         );
+        this.zone.run(() => {
+          this.controller.updateWins('seeker', 1);
+        });
       } else {
         this.simLog.unshift(
           `Round ${i}: Hider survived! Bomb hit at (${roundData.seeker_row}, ${roundData.seeker_col}).`,
         );
+        this.zone.run(() => {
+          this.controller.updateWins('hider', 1); // <--- FIXED: This was accidentally 'seeker' before!
+        });
       }
 
-      // Calculate the exact decimal score delta from the Python backend!
       if (roundData.updated_scores) {
         const hiderDelta = roundData.updated_scores.hider - this.gameData.getCurrentScores().hider;
         const seekerDelta = roundData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
 
-        if (hiderDelta !== 0) this.controller.updateScore('hider', hiderDelta);
-        if (seekerDelta !== 0) this.controller.updateScore('seeker', seekerDelta);
+        this.zone.run(() => {
+          if (hiderDelta !== 0) this.controller.updateScore('hider', hiderDelta);
+          if (seekerDelta !== 0) this.controller.updateScore('seeker', seekerDelta);
+        });
       }
 
-      // Keep log short so it doesn't overflow
       if (this.simLog.length > 5) this.simLog.pop();
 
       await this.delay(2500 / this.speedMultiplier);

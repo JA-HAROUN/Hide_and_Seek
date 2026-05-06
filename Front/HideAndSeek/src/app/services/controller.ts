@@ -87,7 +87,13 @@ export class Controller {
 
       const responseData = await response.json();
       console.log(`📥 [API RESPONSE] /game-state | Data:`, responseData);
-
+      if (responseData.round_result) {
+        if (responseData.round_result.found) {
+          this.updateWins('seeker', 1); // Seeker found it!
+        } else {
+          this.updateWins('hider', 1);  // Hider survived!
+        }
+      }
       if (responseData.updated_scores) {
         const hiderDelta = responseData.updated_scores.hider - this.gameData.getCurrentScores().hider;
         const seekerDelta = responseData.updated_scores.seeker - this.gameData.getCurrentScores().seeker;
@@ -128,7 +134,13 @@ export class Controller {
         if (hiderDelta !== 0) this.updateScore('hider', hiderDelta);
         if (seekerDelta !== 0) this.updateScore('seeker', seekerDelta);
       }
-
+      if (data.found_treasure !== undefined) {
+        if (data.found_treasure) {
+          this.updateWins('seeker', 1); // Computer found you!
+        } else {
+          this.updateWins('hider', 1);  // You survived!
+        }
+      }
       return {
         row: data.computer_guess_row,
         col: data.computer_guess_col,
@@ -190,4 +202,8 @@ export class Controller {
       return null;
     }
   }
+  updateWins(who: 'hider' | 'seeker', delta: number) {
+    this.gameData.updateWins(who, delta);
+  }
+
 }

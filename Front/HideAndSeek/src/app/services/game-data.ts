@@ -9,7 +9,7 @@ export class GameData {
   private role$ = new BehaviorSubject<'hider' | 'third' | 'seeker' | null>(null);
   private scores$ = new BehaviorSubject<{ hider: number; seeker: number }>({ hider: 0, seeker: 0 });
   private matrix$ = new BehaviorSubject<GameBox[][]>([]);
-
+  private wins$ = new BehaviorSubject<{ hider: number; seeker: number }>({ hider: 0, seeker: 0 });
   private payoffMatrix = new BehaviorSubject<number[][]>([]);
   private primalProblem = new BehaviorSubject<any>(null);
   private dualProblem = new BehaviorSubject<any>(null);
@@ -80,7 +80,9 @@ export class GameData {
     this.size$.next({ rows: 0, columns: 0 });
     this.role$.next(null);
     this.scores$.next({ hider: 0, seeker: 0 });
+    this.wins$.next({ hider: 0, seeker: 0 });
     this.matrix$.next([]);
+
   }
 
   // Helpers
@@ -118,5 +120,18 @@ export class GameData {
 
   getUseProximity(): boolean {
     return this.useProximity;
+  }
+  updateWins(who: 'hider' | 'seeker', delta: number) {
+    const cur = this.wins$.value;
+    const updated = { ...cur, [who]: cur[who] + delta } as { hider: number; seeker: number };
+    this.wins$.next(updated);
+  }
+
+  getWins() {
+    return this.wins$.asObservable();
+  }
+
+  getCurrentWins() {
+    return this.wins$.value;
   }
 }

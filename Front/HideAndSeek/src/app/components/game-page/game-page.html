@@ -1,21 +1,32 @@
 <div class="page-container">
-    <header class="page-header">
-        <div class="score-panel">
-            <div class="score-label"><h2>Treasures Hidden</h2></div>
-            <div class="score-value"><p>{{ hiderScore }}</p></div>
-        </div>
-        <div class="score-panel">
-            <div class="score-label"><h2>Treasures Found</h2></div>
-            <div class="score-value"><p>{{ seekerScore }}</p></div>
-        </div>
-    </header>
+  <header class="page-header">
 
-    <main class="board-area">
-        <app-matrix-generator></app-matrix-generator>
-    </main>
+    <!-- HIDER SCOREBOARD -->
+    <div class="score-panel">
+      <div class="score-label"><h2>Treasures Hidden (Hider)</h2></div>
+      <div class="score-value">
+        <p class="points-text">{{ hiderScore | number:'1.0-2' }} pts</p>
+        <span class="wins-text">🏴‍☠️ {{ hiderWins }} Wins</span>
+      </div>
+    </div>
 
-    <footer class="page-footer">
-        <button class="btn-secondary btn-small" (click)="showSimplexTableau()">Captain's Log (Tableau)</button>
-        <button class="btn-accent btn-small" (click)="resetGame()">New Voyage</button>
-    </footer>
+    <!-- SEEKER SCOREBOARD -->
+    <div class="score-panel">
+      <div class="score-label"><h2>Treasures Found (Seeker)</h2></div>
+      <div class="score-value">
+        <p class="points-text">{{ seekerScore | number:'1.0-2' }} pts</p>
+        <span class="wins-text">⚓ {{ seekerWins }} Wins</span>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="board-area">
+    <app-matrix-generator></app-matrix-generator>
+  </main>
+
+  <footer class="page-footer">
+    <button class="btn-secondary btn-small" (click)="showSimplexTableau()">Captain's Log (Tableau)</button>
+    <button class="btn-accent btn-small" (click)="resetGame()">New Voyage</button>
+  </footer>
 </div>
