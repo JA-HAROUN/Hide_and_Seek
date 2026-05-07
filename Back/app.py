@@ -42,6 +42,7 @@ def setup_game():
             grid_layout.append(current_row)
 
         hider_probs = current_game.probabilities.tolist()
+        seeker_probs = current_game.seeker_probabilities.tolist()
 
         response = {
             "success": True,
@@ -49,9 +50,9 @@ def setup_game():
             "columns": columns,
             "payoff_matrix": current_game.pay_matrix.tolist(),
             "primal": hider_probs,
-            "dual": hider_probs,
+            "dual": seeker_probs,
             "hider_probs": hider_probs,
-            "seeker_probs": hider_probs,
+            "seeker_probs": seeker_probs,
             "grid_layout": grid_layout,
             "game_value": float(current_game.value)
         }
